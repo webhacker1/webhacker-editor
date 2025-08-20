@@ -76,6 +76,9 @@ export function highlightCodeElement(codeEl) {
     );
   }
 
-  codeEl.innerHTML = html;
-  codeEl.classList.add("hljs");
+    const prev = codeEl.innerHTML;
+    if (prev !== html) {
+    codeEl.innerHTML = html;
+    }
+    codeEl.classList.add("hljs");
 }

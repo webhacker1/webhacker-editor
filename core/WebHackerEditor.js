@@ -252,15 +252,17 @@ class WebHackerEditor {
 
   bindEvents() {
     this.contentElement.addEventListener("input", () => {
-      this.emitChange();
-      this.syncActiveStates();
-      if (isSelectionInside("pre")) {
-        this.highlightActiveCodeBlockLive();
+    this.emitChange();
+    this.syncActiveStates();
+    if (isSelectionInside("pre")) {
+        // debounce подсветки, чтобы не дёргать DOM на каждый символ
+        clearTimeout(this._hlTimer);
+        this._hlTimer = setTimeout(() => this.highlightActiveCodeBlockLive(), 120);
         this.updateSuggestion();
         this.updateCodeControls();
-      } else {
+    } else {
         this.hideSuggestion();
-      }
+    }
     });
 
     this.contentElement.addEventListener("paste", (e) => {
@@ -332,7 +334,7 @@ class WebHackerEditor {
     if (this.trackedButtonsMap.alignRight) this.trackedButtonsMap.alignRight.setAttribute("aria-pressed", String(document.queryCommandState("justifyRight")));
   }
 
-  getHTML() { return this.contentElement.innerHTML.trim(); }
+  getHTML() { return this._prepareHTMLForExport(this.contentElement.innerHTML).trim(); }
   setHTML(html) { this.contentElement.innerHTML = html || ""; this.applySyntaxHighlightingInEditor(); this.syncActiveStates(); }
 
   addAction(cfg) {
@@ -519,6 +521,41 @@ class WebHackerEditor {
     ctrls.style.left = `${Math.max(8, left)}px`;
     ctrls.style.display = "inline-flex";
   }
+
+    _prepareHTMLForExport(html) {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = html;
+
+    // 1) Таблицам — предсказуемый класс (на стили не завязано, но удобно)
+    wrap.querySelectorAll("table").forEach(t => t.classList.add("wh-table"));
+
+    // 2) Каждый <pre> должен содержать <code>
+    wrap.querySelectorAll("pre").forEach(pre => {
+        let code = pre.querySelector("code");
+        if (!code) {
+        code = document.createElement("code");
+        code.textContent = pre.textContent;
+        pre.textContent = "";
+        pre.appendChild(code);
+        }
+        // 3) Подсветка, если ещё не применена
+        if (window.hljs && !code.classList.contains("hljs")) {
+        try {
+            // язык из class="language-xxx", если задан
+            const lang = Array.from(code.classList)
+            .find(c => c.startsWith("language-"))?.slice("language-".length);
+            const res = (lang && lang !== "auto")
+            ? window.hljs.highlight(code.textContent, { language: lang, ignoreIllegals: true })
+            : window.hljs.highlightAuto(code.textContent);
+            code.innerHTML = res.value;
+            code.classList.add("hljs");
+        } catch (_) { /* не ломаем сохранение */ }
+        }
+    });
+
+    return wrap.innerHTML;
+    }
+
 
   updateSuggestion() {
     const code = getActiveCodeElement();
