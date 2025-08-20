@@ -1,0 +1,18 @@
+export const LANG_OPTIONS = [
+  { label: "Auto", value: "auto" },
+  { label: "JavaScript", value: "javascript" },
+  { label: "TypeScript", value: "typescript" },
+  { label: "HTML", value: "xml" },
+  { label: "CSS", value: "css" },
+  { label: "JSON", value: "json" },
+  { label: "Bash", value: "bash" },
+  { label: "Python", value: "python" },
+  { label: "PHP", value: "php" },
+  { label: "Go", value: "go" },
+  { label: "YAML", value: "yaml" },
+  { label: "Markdown", value: "markdown" },
+  { label: "SQL", value: "sql" },
+  { label: "Java", value: "java" },
+  { label: "C#", value: "csharp" },
+  { label: "C++", value: "cpp" },
+];
