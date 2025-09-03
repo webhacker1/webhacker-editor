@@ -305,3 +305,35 @@
   gap: 8px;
   justify-content: flex-end;
 }
+
+/* alias, чтобы таблицы с классом .wh-table выглядели так же, как в whEditor.css */
+.wh-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+  background: #fff;
+}
+
+.wh-table thead th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-color, #0b1220);
+  border-bottom: 1px solid var(--table-line, #e5e9f1);
+}
+
+.wh-table th,
+.wh-table td {
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+.wh-table tbody tr + tr td {
+  border-top: 1px solid var(--table-line, #e5e9f1);
+}
+
+.wh-table td.is-numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
