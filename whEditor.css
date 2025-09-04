@@ -59,7 +59,8 @@
     outline: 2px solid var(--accent-color);
     outline-offset: 1px;
 }
-.webhacker-button--primary {
+.webhacker-button--primary,
+.webhacker-button--primary:hover {
     background: var(--accent-color);
     border-color: transparent;
     color: #fff;
@@ -200,24 +201,40 @@
 }
 
 .wh-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 12px 0;
-  font-size: 14px;
-  background: var(--background-color);
-  color: var(--text-color);
-}
-
-.wh-table th,
-.wh-table td {
-  padding: 10px 12px;
-  border: 1px solid var(--table-line);
-  vertical-align: top;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 16px 0;
+    font-size: 14px;
+    background: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--table-line);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 .wh-table thead th {
-  font-weight: 600;
-  background: var(--soft-background);
+    background: #f3f6fb;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 14px;
+    color: var(--text-color);
+    border-bottom: 1px solid #e5e9f1;
+}
+
+.wh-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--table-line);
+}
+
+.wh-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.wh-table td.is-numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
 }
 
 .webhacker-color {
