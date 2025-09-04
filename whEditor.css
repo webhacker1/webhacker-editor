@@ -1,5 +1,5 @@
 :root {
-  --editor-background: #ffffff;
+  --editor-background: var(--editor-background)fff;
   --panel-background: #f7f9fc;
   --border-color: #e5e9f1;
   --text-color: #0b1220;
@@ -49,7 +49,7 @@
 .webhacker-button {
   appearance: none;
   border: 1px solid var(--border-color);
-  background: #fff;
+  background: var(--editor-background);
   color: var(--text-color);
   padding: 6px 8px;
   border-radius: 10px;
@@ -68,7 +68,7 @@
 .webhacker-button--primary {
   background: var(--accent-color);
   border-color: transparent;
-  color: #fff;
+  color: var(--editor-background);
 }
 
 .webhacker-button--ghost {
@@ -84,7 +84,7 @@
   top: 40px;
   left: 0;
   min-width: 240px;
-  background: #fff;
+  background: var(--editor-background);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 8px;
@@ -250,7 +250,7 @@
   border-collapse: collapse;
   margin: 12px 0;
   font-size: 14px;
-  background: #fff;
+  background: var(--editor-background);
 }
 
 .wh-table thead th {
@@ -310,7 +310,7 @@
   padding: 8px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #fff;
+  background: var(--editor-background);
   color: var(--text-color);
 }
 
