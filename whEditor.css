@@ -201,43 +201,42 @@
 }
 
 .wh-table {
-  display: inline-table;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--background-color);
-  color: var(--text-color);
-  border: 1px solid var(--table-line);
-  border-radius: 10px;
-  overflow: hidden;
-  margin: 16px auto;
-  max-width: 100%;
+    display: inline-table;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--table-line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px auto;
+    max-width: 100%;
 }
 
 .wh-table th,
 .wh-table td {
-  padding: 10px 14px;
-  vertical-align: top;
-  border-right: 1px solid var(--table-line);
-  border-bottom: 1px solid var(--table-line);
-  word-break: break-word;
+    padding: 10px 14px;
+    vertical-align: top;
+    border-right: 1px solid var(--table-line);
+    border-bottom: 1px solid var(--table-line);
+    word-break: break-word;
 }
 
 .wh-table thead th {
-  font-weight: 600;
-  background: #f3f6fb;
+    font-weight: 600;
 }
 
 .wh-table th:last-child,
 .wh-table td:last-child {
-  border-right: 0;
+    border-right: 0;
 }
 
 .wh-table tr:last-child td {
-  border-bottom: 0;
+    border-bottom: 0;
 }
 
 .wh-table + .wh-table {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 .webhacker-color {
