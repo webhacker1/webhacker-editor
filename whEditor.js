@@ -1,169 +1,189 @@
-const DEFAULT_TEXT_PRESET_COLORS = [
-  "#111827","#374151","#6B7280","#9CA3AF","#D1D5DB","#F3F4F6",
-  "#FFFFFF","#6A5ACD","#2563EB","#0891B2","#10B981","#F59E0B","#EF4444"
-];
+(function () {
+  const DEFAULT_TEXT_PRESET_COLORS = [
+    "#111827","#374151","#6B7280","#9CA3AF","#D1D5DB","#F3F4F6",
+    "#FFFFFF","#6A5ACD","#2563EB","#0891B2","#10B981","#F59E0B","#EF4444"
+  ];
 
-function createElement(tagName, className, attributes) {
-  const element = document.createElement(tagName);
-  if (className) element.className = className;
-  if (attributes) Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
-  return element;
-}
-
-function executeRichCommand(commandName, commandValue = null) {
-  document.execCommand(commandName, false, commandValue);
-}
-
-function escapeHtml(stringValue) {
-  return String(stringValue).replace(/[&<>"']/g, match => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[match]));
-}
-
-function ensureSafeUrl(rawUrl) {
-  const value = String(rawUrl || "").trim();
-  if (/^(https?:|mailto:|tel:|data:image\/)/i.test(value)) return value;
-  const stripped = value.replace(/^[a-zA-Z][\w+.-]*:/, "");
-  return stripped ? "https://" + stripped : "https://";
-}
-
-const ALLOWED_TAG_SET = new Set([
-  "p","br","hr","strong","b","em","i","u","s","mark","small","sub","sup",
-  "span","font","a","ul","ol","li","blockquote",
-  "h1","h2","h3","h4","h5","h6",
-  "figure","figcaption","dl","dt","dd","img",
-  "table","thead","tbody","tr","th","td"
-]);
-
-const TABLE_ALLOWED_CLASS_LIST = ["wh-table"];
-
-function normalizeCssColorToHex(inputValue) {
-  const value = String(inputValue || "").trim();
-  if (/^#([0-9a-fA-F]{3}){1,2}$/.test(value)) {
-    if (value.length === 4) return ("#" + value[1] + value[1] + value[2] + value[2] + value[3] + value[3]).toUpperCase();
-    return value.toUpperCase();
+  function createElement(tagName, className, attributes) {
+    const element = document.createElement(tagName);
+    if (className) element.className = className;
+    if (attributes) Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
   }
-  const rgbMatch = value.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*[\d.]+\s*)?\)$/);
-  if (rgbMatch) {
-    const clamp = n => Math.max(0, Math.min(255, parseInt(n, 10)));
-    const toHex = n => clamp(n).toString(16).padStart(2, "0");
-    return ("#" + toHex(rgbMatch[1]) + toHex(rgbMatch[2]) + toHex(rgbMatch[3])).toUpperCase();
+
+  function executeRichCommand(commandName, commandValue = null) {
+    document.execCommand(commandName, false, commandValue);
   }
-  return null;
-}
 
-function sanitizeStyleAttributeToColorOnly(element) {
-  if (!element.hasAttribute("style")) return;
-  const rules = (element.getAttribute("style") || "").split(";").map(s => s.trim()).filter(Boolean);
-  let colorHex = null;
-  for (const rule of rules) {
-    const parts = rule.split(":");
-    const propertyName = parts[0] ? parts[0].trim().toLowerCase() : "";
-    const propertyValue = parts[1] ? parts[1].trim() : "";
-    if (propertyName === "color") {
-      const hex = normalizeCssColorToHex(propertyValue);
-      if (hex) colorHex = hex;
+  function escapeHtml(stringValue) {
+    return String(stringValue).replace(/[&<>"']/g, match => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[match]));
+  }
+
+  function ensureSafeUrl(rawUrl) {
+    const value = String(rawUrl || "").trim();
+    if (/^(https?:|mailto:|tel:|data:image\/)/i.test(value)) return value;
+    const stripped = value.replace(/^[a-zA-Z][\w+.-]*:/, "");
+    return stripped ? "https://" + stripped : "https://";
+  }
+
+  const ALLOWED_TAG_SET = new Set([
+    "p","br","hr","strong","b","em","i","u","s","mark","small","sub","sup",
+    "span","font","a","ul","ol","li","blockquote",
+    "h1","h2","h3","h4","h5","h6",
+    "figure","figcaption","dl","dt","dd","img",
+    "table","thead","tbody","tr","th","td",
+    "div"
+  ]);
+
+  const TABLE_ALLOWED_CLASS_LIST = ["wh-table"];
+
+  function normalizeCssColorToHex(inputValue) {
+    const value = String(inputValue || "").trim();
+    if (/^#([0-9a-fA-F]{3}){1,2}$/.test(value)) {
+      if (value.length === 4) return ("#" + value[1] + value[1] + value[2] + value[2] + value[3] + value[3]).toUpperCase();
+      return value.toUpperCase();
+    }
+    const rgbMatch = value.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*[\d.]+\s*)?\)$/);
+    if (rgbMatch) {
+      const clamp = n => Math.max(0, Math.min(255, parseInt(n, 10)));
+      const toHex = n => clamp(n).toString(16).padStart(2, "0");
+      return ("#" + toHex(rgbMatch[1]) + toHex(rgbMatch[2]) + toHex(rgbMatch[3])).toUpperCase();
+    }
+    return null;
+  }
+
+  function sanitizeStyleAttributeForElement(element) {
+    if (!element.hasAttribute("style")) return;
+    const tagName = element.tagName.toLowerCase();
+    const rules = (element.getAttribute("style") || "").split(";").map(s => s.trim()).filter(Boolean);
+    const blockAlignTags = new Set(["p","div","blockquote","li","td","th","h1","h2","h3","h4","h5","h6"]);
+    let colorHex = null;
+    let textAlign = null;
+    for (const rule of rules) {
+      const parts = rule.split(":");
+      const propertyName = parts[0] ? parts[0].trim().toLowerCase() : "";
+      const propertyValue = parts[1] ? parts[1].trim() : "";
+      if (propertyName === "color" && tagName === "span") {
+        const hex = normalizeCssColorToHex(propertyValue);
+        if (hex) colorHex = hex;
+      }
+      if (propertyName === "text-align" && blockAlignTags.has(tagName)) {
+        const val = propertyValue.toLowerCase();
+        if (val === "left" || val === "right" || val === "center" || val === "justify") textAlign = val;
+      }
+    }
+    const parts = [];
+    if (colorHex) parts.push(`color: ${colorHex}`);
+    if (textAlign) parts.push(`text-align: ${textAlign}`);
+    if (parts.length) element.setAttribute("style", parts.join("; ")); else element.removeAttribute("style");
+  }
+
+  function sanitizeElementAttributes(element) {
+    [...element.attributes].filter(attribute => /^on/i.test(attribute.name)).forEach(attribute => element.removeAttribute(attribute.name));
+    const tagName = element.tagName.toLowerCase();
+    element.removeAttribute("id");
+    switch (tagName) {
+      case "a": {
+        const hrefValue = ensureSafeUrl(element.getAttribute("href") || "");
+        element.setAttribute("href", hrefValue);
+        element.setAttribute("target", "_blank");
+        element.setAttribute("rel", "noopener noreferrer");
+        [...element.attributes].forEach(attribute => { if (!["href","target","rel","style"].includes(attribute.name)) element.removeAttribute(attribute.name); });
+        sanitizeStyleAttributeForElement(element);
+        break;
+      }
+      case "img": {
+        const srcValue = ensureSafeUrl(element.getAttribute("src") || "");
+        element.setAttribute("src", srcValue);
+        const altValue = element.getAttribute("alt") || "";
+        element.setAttribute("alt", altValue);
+        [...element.attributes].forEach(attribute => { if (!["src","alt"].includes(attribute.name)) element.removeAttribute(attribute.name); });
+        break;
+      }
+      case "span": {
+        sanitizeStyleAttributeForElement(element);
+        [...element.attributes].forEach(attribute => { if (!["style"].includes(attribute.name)) element.removeAttribute(attribute.name); });
+        break;
+      }
+      case "font": {
+        const hexColor = normalizeCssColorToHex(element.getAttribute("color"));
+        if (hexColor) element.setAttribute("color", hexColor); else element.removeAttribute("color");
+        [...element.attributes].forEach(attribute => { if (!["color"].includes(attribute.name)) element.removeAttribute(attribute.name); });
+        break;
+      }
+      case "table": {
+        const filteredClassList = (element.getAttribute("class") || "").split(/\s+/).filter(className => TABLE_ALLOWED_CLASS_LIST.includes(className));
+        if (filteredClassList.length) element.setAttribute("class", filteredClassList.join(" ")); else element.removeAttribute("class");
+        [...element.attributes].forEach(attribute => { if (!["class"].includes(attribute.name)) element.removeAttribute(attribute.name); });
+        break;
+      }
+      case "td":
+      case "th": {
+        const filteredCellClassList = (element.getAttribute("class") || "").split(/\s+/).filter(className => className === "is-numeric");
+        if (filteredCellClassList.length) element.setAttribute("class", filteredCellClassList.join(" ")); else element.removeAttribute("class");
+        const colspanValue = element.getAttribute("colspan");
+        const rowspanValue = element.getAttribute("rowspan");
+        [...element.attributes].forEach(attribute => { if (!["class","colspan","rowspan","style"].includes(attribute.name)) element.removeAttribute(attribute.name); });
+        if (colspanValue && !/^\d+$/.test(colspanValue)) element.removeAttribute("colspan");
+        if (rowspanValue && !/^\d+$/.test(rowspanValue)) element.removeAttribute("rowspan");
+        sanitizeStyleAttributeForElement(element);
+        break;
+      }
+      default: {
+        sanitizeStyleAttributeForElement(element);
+        [...element.attributes].forEach(attribute => { if (!["style"].includes(attribute.name)) element.removeAttribute(attribute.name); });
+      }
     }
   }
-  if (colorHex) element.setAttribute("style", `color: ${colorHex}`); else element.removeAttribute("style");
-}
 
-function sanitizeElementAttributes(element) {
-  [...element.attributes].filter(attribute => /^on/i.test(attribute.name)).forEach(attribute => element.removeAttribute(attribute.name));
-  const tagName = element.tagName.toLowerCase();
-  element.removeAttribute("id");
-  if (!(tagName === "span" || tagName === "font")) element.removeAttribute("style");
-  switch (tagName) {
-    case "a": {
-      const hrefValue = ensureSafeUrl(element.getAttribute("href") || "");
-      element.setAttribute("href", hrefValue);
-      element.setAttribute("target", "_blank");
-      element.setAttribute("rel", "noopener noreferrer");
-      [...element.attributes].forEach(attribute => { if (!["href","target","rel"].includes(attribute.name)) element.removeAttribute(attribute.name); });
-      break;
-    }
-    case "img": {
-      const srcValue = ensureSafeUrl(element.getAttribute("src") || "");
-      element.setAttribute("src", srcValue);
-      const altValue = element.getAttribute("alt") || "";
-      element.setAttribute("alt", altValue);
-      [...element.attributes].forEach(attribute => { if (!["src","alt"].includes(attribute.name)) element.removeAttribute(attribute.name); });
-      break;
-    }
-    case "span": {
-      sanitizeStyleAttributeToColorOnly(element);
-      [...element.attributes].forEach(attribute => { if (!["style"].includes(attribute.name)) element.removeAttribute(attribute.name); });
-      break;
-    }
-    case "font": {
-      const hexColor = normalizeCssColorToHex(element.getAttribute("color"));
-      if (hexColor) element.setAttribute("color", hexColor); else element.removeAttribute("color");
-      [...element.attributes].forEach(attribute => { if (!["color"].includes(attribute.name)) element.removeAttribute(attribute.name); });
-      break;
-    }
-    case "table": {
-      const filteredClassList = (element.getAttribute("class") || "").split(/\s+/).filter(className => TABLE_ALLOWED_CLASS_LIST.includes(className));
-      if (filteredClassList.length) element.setAttribute("class", filteredClassList.join(" ")); else element.removeAttribute("class");
-      [...element.attributes].forEach(attribute => { if (!["class"].includes(attribute.name)) element.removeAttribute(attribute.name); });
-      break;
-    }
-    case "td":
-    case "th": {
-      const filteredCellClassList = (element.getAttribute("class") || "").split(/\s+/).filter(className => className === "is-numeric");
-      if (filteredCellClassList.length) element.setAttribute("class", filteredCellClassList.join(" ")); else element.removeAttribute("class");
-      const colspanValue = element.getAttribute("colspan");
-      const rowspanValue = element.getAttribute("rowspan");
-      [...element.attributes].forEach(attribute => { if (!["class","colspan","rowspan"].includes(attribute.name)) element.removeAttribute(attribute.name); });
-      if (colspanValue && !/^\d+$/.test(colspanValue)) element.removeAttribute("colspan");
-      if (rowspanValue && !/^\d+$/.test(rowspanValue)) element.removeAttribute("rowspan");
-      break;
-    }
-    default: {
-      [...element.attributes].forEach(attribute => { if (attribute.name !== "style") element.removeAttribute(attribute.name); });
+  function sanitizeNodeRecursively(node) {
+    if (node.nodeType === Node.COMMENT_NODE) { node.remove(); return; }
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const tagName = node.tagName.toLowerCase();
+      if (!ALLOWED_TAG_SET.has(tagName)) { const textNode = document.createTextNode(node.textContent || ""); node.replaceWith(textNode); return; }
+      sanitizeElementAttributes(node);
+      [...node.childNodes].forEach(childNode => sanitizeNodeRecursively(childNode));
+    } else {
+      [...(node.childNodes || [])].forEach(childNode => sanitizeNodeRecursively(childNode));
     }
   }
-}
 
-function sanitizeNodeRecursively(node) {
-  if (node.nodeType === Node.COMMENT_NODE) { node.remove(); return; }
-  if (node.nodeType === Node.ELEMENT_NODE) {
-    const tagName = node.tagName.toLowerCase();
-    if (!ALLOWED_TAG_SET.has(tagName)) { const textNode = document.createTextNode(node.textContent || ""); node.replaceWith(textNode); return; }
-    sanitizeElementAttributes(node);
-    [...node.childNodes].forEach(childNode => sanitizeNodeRecursively(childNode));
-  } else {
-    [...(node.childNodes || [])].forEach(childNode => sanitizeNodeRecursively(childNode));
+  function sanitizeHtmlStringToSafeHtml(htmlString) {
+    const templateElement = document.createElement("template");
+    templateElement.innerHTML = String(htmlString || "");
+    sanitizeNodeRecursively(templateElement.content);
+    return templateElement.innerHTML;
   }
-}
 
-export function sanitizeHtmlStringToSafeHtml(htmlString) {
-  const templateElement = document.createElement("template");
-  templateElement.innerHTML = String(htmlString || "");
-  sanitizeNodeRecursively(templateElement.content);
-  return templateElement.innerHTML;
-}
+  function applyThemeVariables(editorRootElement, themeOptions) {
+    if (!themeOptions) return;
+    if (themeOptions.backgroundColor) editorRootElement.style.setProperty("--editor-background", themeOptions.backgroundColor);
+    if (themeOptions.textColor) editorRootElement.style.setProperty("--text-color", themeOptions.textColor);
+  }
 
-export default class WebHackerEditor {
-  constructor(rootSelectorOrElement, editorOptions = {}) {
+  function WebHackerEditor(rootSelectorOrElement, editorOptions = {}) {
     this.hostContainerElement = typeof rootSelectorOrElement === "string" ? document.querySelector(rootSelectorOrElement) : rootSelectorOrElement;
     if (!this.hostContainerElement) throw new Error("WebHackerEditor: контейнер не найден");
-    const defaultEditorOptions = { placeholderText: "Начните печатать…", onChange: null };
+    const defaultEditorOptions = { placeholderText: "Начните печатать…", onChange: null, theme: null };
     this.editorOptions = Object.assign({}, defaultEditorOptions, editorOptions);
     this.currentSavedSelectionRange = null;
     this.trackedToggleButtonsMap = {};
     this.renderEditorInterface();
+    applyThemeVariables(this.editorRootElement, this.editorOptions.theme);
     this.bindEditorEvents();
   }
 
-  getHTML() {
+  WebHackerEditor.prototype.getHTML = function () {
     return sanitizeHtmlStringToSafeHtml(this.contentEditableElement.innerHTML).trim();
-  }
+  };
 
-  setHTML(htmlString) {
+  WebHackerEditor.prototype.setHTML = function (htmlString) {
     const safeHtml = sanitizeHtmlStringToSafeHtml(htmlString);
     this.contentEditableElement.innerHTML = safeHtml || "";
     this.syncToggleStates();
-  }
+  };
 
-  renderEditorInterface() {
+  WebHackerEditor.prototype.renderEditorInterface = function () {
     const editorRootElement = createElement("div", "webhacker-editor", { role: "region" });
     const toolbarElement = createElement("div", "webhacker-toolbar");
 
@@ -219,13 +239,13 @@ export default class WebHackerEditor {
     this.editorRootElement = editorRootElement;
     this.toolbarElement = toolbarElement;
     this.contentEditableElement = contentEditableElement;
-  }
+  };
 
-  createSeparator() {
+  WebHackerEditor.prototype.createSeparator = function () {
     return createElement("div", "webhacker-toolbar__separator");
-  }
+  };
 
-  createToolbarButton(iconClassName, buttonTitleText, onClickHandler, trackToggleState = false, toggleKey = null) {
+  WebHackerEditor.prototype.createToolbarButton = function (iconClassName, buttonTitleText, onClickHandler, trackToggleState = false, toggleKey = null) {
     const buttonElement = createElement("button", "webhacker-button", { type: "button", title: buttonTitleText, "aria-label": buttonTitleText });
     const iconElement = createElement("i", iconClassName);
     buttonElement.appendChild(iconElement);
@@ -238,9 +258,9 @@ export default class WebHackerEditor {
     });
     if (trackToggleState && toggleKey) this.trackedToggleButtonsMap[toggleKey] = buttonElement;
     return buttonElement;
-  }
+  };
 
-  createDropdown(triggerIconClassName, triggerTitleText) {
+  WebHackerEditor.prototype.createDropdown = function (triggerIconClassName, triggerTitleText) {
     const dropdownWrapperElement = createElement("div", "webhacker-dropdown");
     const triggerButtonElement = this.createToolbarButton(triggerIconClassName, triggerTitleText, () => {});
     const dropdownMenuElement = createElement("div", "webhacker-menu webhacker-menu--hidden");
@@ -250,9 +270,9 @@ export default class WebHackerEditor {
     });
     dropdownWrapperElement.append(triggerButtonElement, dropdownMenuElement);
     return { dropdownWrapperElement, dropdownMenuElement };
-  }
+  };
 
-  createHeadingDropdown() {
+  WebHackerEditor.prototype.createHeadingDropdown = function () {
     const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown("fa-solid fa-heading", "Заголовки");
     [
       { label: "Абзац", tag: "p" },
@@ -274,9 +294,9 @@ export default class WebHackerEditor {
       dropdownMenuElement.appendChild(menuItemElement);
     });
     return dropdownWrapperElement;
-  }
+  };
 
-  createColorDropdown() {
+  WebHackerEditor.prototype.createColorDropdown = function () {
     const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown("fa-solid fa-palette", "Цвет текста");
     const colorContainerElement = createElement("div", "webhacker-color");
     const swatchesContainerElement = createElement("div", "webhacker-color__swatches");
@@ -344,9 +364,9 @@ export default class WebHackerEditor {
       this.syncToggleStates();
     });
     return dropdownWrapperElement;
-  }
+  };
 
-  createLinkDropdown() {
+  WebHackerEditor.prototype.createLinkDropdown = function () {
     const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown("fa-solid fa-link", "Ссылка");
     const linkFormElement = createElement("div", "webhacker-form");
     const linkUrlInputElement = createElement("input", "webhacker-input", { type: "text", placeholder: "https://пример.ру" });
@@ -384,9 +404,9 @@ export default class WebHackerEditor {
       this.syncToggleStates();
     });
     return dropdownWrapperElement;
-  }
+  };
 
-  createImageDropdown() {
+  WebHackerEditor.prototype.createImageDropdown = function () {
     const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown("fa-solid fa-image", "Изображение");
     const imageFormElement = createElement("div", "webhacker-form");
     const imageUrlInputElement = createElement("input", "webhacker-input", { type: "text", placeholder: "URL изображения" });
@@ -429,9 +449,9 @@ export default class WebHackerEditor {
       this.syncToggleStates();
     });
     return dropdownWrapperElement;
-  }
+  };
 
-  toggleMenu(dropdownMenuElement) {
+  WebHackerEditor.prototype.toggleMenu = function (dropdownMenuElement) {
     this.closeAllMenus(dropdownMenuElement);
     dropdownMenuElement.classList.toggle("webhacker-menu--hidden");
     const onOutsideMouseDown = event => {
@@ -441,15 +461,15 @@ export default class WebHackerEditor {
       }
     };
     document.addEventListener("mousedown", onOutsideMouseDown, true);
-  }
+  };
 
-  closeAllMenus(exceptDropdownMenuElement) {
+  WebHackerEditor.prototype.closeAllMenus = function (exceptDropdownMenuElement) {
     this.editorRootElement.querySelectorAll(".webhacker-menu").forEach(menuElement => {
       if (menuElement !== exceptDropdownMenuElement) menuElement.classList.add("webhacker-menu--hidden");
     });
-  }
+  };
 
-  bindEditorEvents() {
+  WebHackerEditor.prototype.bindEditorEvents = function () {
     this.contentEditableElement.addEventListener("input", () => {
       this.emitChange();
       this.syncToggleStates();
@@ -487,13 +507,13 @@ export default class WebHackerEditor {
       if (hasCommandModifier && pressedKey === "z" && !event.shiftKey) { event.preventDefault(); executeRichCommand("undo"); this.emitChange(); this.syncToggleStates(); }
       if ((hasCommandModifier && pressedKey === "y") || (hasCommandModifier && event.shiftKey && pressedKey === "z")) { event.preventDefault(); executeRichCommand("redo"); this.emitChange(); this.syncToggleStates(); }
     });
-  }
+  };
 
-  emitChange() {
+  WebHackerEditor.prototype.emitChange = function () {
     if (typeof this.editorOptions.onChange === "function") this.editorOptions.onChange(this.getHTML());
-  }
+  };
 
-  syncToggleStates() {
+  WebHackerEditor.prototype.syncToggleStates = function () {
     const readCommandState = commandName => String(document.queryCommandState(commandName));
     const updateToggleButton = (key, value) => { if (this.trackedToggleButtonsMap[key]) this.trackedToggleButtonsMap[key].setAttribute("aria-pressed", value); };
     updateToggleButton("bold", readCommandState("bold"));
@@ -505,9 +525,9 @@ export default class WebHackerEditor {
     updateToggleButton("alignLeft", readCommandState("justifyLeft"));
     updateToggleButton("alignCenter", readCommandState("justifyCenter"));
     updateToggleButton("alignRight", readCommandState("justifyRight"));
-  }
+  };
 
-  insertMinimalTable(rowCount = 2, columnCount = 2) {
+  WebHackerEditor.prototype.insertMinimalTable = function (rowCount = 2, columnCount = 2) {
     let tableHeadHtml = "<thead><tr>";
     for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) tableHeadHtml += "<th>Заголовок</th>";
     tableHeadHtml += "</tr></thead>";
@@ -520,18 +540,25 @@ export default class WebHackerEditor {
     tableBodyHtml += "</tbody>";
     const htmlToInsert = `<table class="wh-table">${tableHeadHtml}${tableBodyHtml}</table>`;
     document.execCommand("insertHTML", false, htmlToInsert);
-  }
+  };
 
-  saveSelectionRange() {
+  WebHackerEditor.prototype.saveSelectionRange = function () {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return null;
     return selection.getRangeAt(0).cloneRange();
-  }
+  };
 
-  restoreSelectionRange(savedRange) {
+  WebHackerEditor.prototype.restoreSelectionRange = function (savedRange) {
     if (!savedRange) return;
     const selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(savedRange);
-  }
-}
+  };
+
+  WebHackerEditor.prototype.setTheme = function (themeOptions) {
+    applyThemeVariables(this.editorRootElement, themeOptions || null);
+  };
+
+  window.WebHackerEditor = WebHackerEditor;
+  window.sanitizeHtmlStringToSafeHtml = sanitizeHtmlStringToSafeHtml;
+})();
