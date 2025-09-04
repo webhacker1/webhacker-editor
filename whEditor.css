@@ -1,173 +1,150 @@
 :root {
-  --editor-background: var(--editor-background)fff;
-  --panel-background: #f7f9fc;
-  --border-color: #e5e9f1;
-  --text-color: #0b1220;
-  --muted-color: #6b7280;
-  --accent-color: #2563eb;
-  --soft-background: #f3f6fb;
-  --table-line: #e5e9f1;
+    --border-color: #e5e9f1;
+    --text-color: #0b1220;
+    --muted-color: #6b7280;
+    --accent-color: #2563eb;
+    --background-color: #f3f6fb;
+    --table-line: #e5e9f1;
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .webhacker-editor {
-  position: relative;
-  background: var(--editor-background);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  overflow: hidden;
-  color: var(--text-color);
-  font: 14px/1.5 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  box-shadow: var(--shadow-elevation);
+    position: relative;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    color: var(--text-color);
 }
 
 .webhacker-toolbar {
-  display: flex;
-  gap: 8px;
-  padding: 10px;
-  background: var(--panel-background);
-  border-bottom: 1px solid var(--border-color);
-  align-items: center;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    background: var(--background-color);
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    flex-wrap: wrap;
+    color: var(--text-color);
 }
 
 .webhacker-toolbar__group {
-  display: flex;
-  gap: 6px;
-  align-items: center;
+    display: flex;
+    gap: 6px;
+    align-items: center;
 }
 
 .webhacker-toolbar__separator {
-  width: 1px;
-  height: 24px;
-  background: var(--border-color);
+    width: 1px;
+    height: 24px;
+    background: var(--border-color);
 }
 
 .webhacker-button {
-  appearance: none;
-  border: 1px solid var(--border-color);
-  background: var(--editor-background);
-  color: var(--text-color);
-  padding: 6px 8px;
-  border-radius: 10px;
-  cursor: pointer;
+    appearance: none;
+    border: 1px solid var(--border-color);
+    background: var(--background-color);
+    color: var(--text-color);
+    padding: 6px 8px;
+    border-radius: 10px;
+    cursor: pointer;
 }
-
 .webhacker-button:hover {
-  background: var(--soft-background);
+    background: var(--background-color);
 }
-
 .webhacker-button[aria-pressed="true"] {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 1px;
+    outline: 2px solid var(--accent-color);
+    outline-offset: 1px;
 }
-
 .webhacker-button--primary {
-  background: var(--accent-color);
-  border-color: transparent;
-  color: var(--editor-background);
+    background: var(--accent-color);
+    border-color: transparent;
+    color: #fff;
 }
-
 .webhacker-button--ghost {
-  background: transparent;
+    background: transparent;
 }
 
 .webhacker-dropdown {
-  position: relative;
+    position: relative;
 }
 
 .webhacker-menu {
-  position: absolute;
-  top: 40px;
-  left: 0;
-  min-width: 240px;
-  background: var(--editor-background);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 8px;
-  box-shadow: var(--shadow-elevation);
-  z-index: 20;
+    position: absolute;
+    top: 40px;
+    left: 0;
+    min-width: 240px;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 8px;
+    z-index: 20;
+    color: var(--text-color);
 }
-
 .webhacker-menu--hidden {
-  display: none;
+    display: none;
 }
-
 .webhacker-menu__item {
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
 }
-
 .webhacker-menu__item:hover {
-  background: var(--soft-background);
+    background: var(--background-color);
 }
 
 .webhacker-content {
-  min-height: 320px;
-  padding: 18px;
-  outline: none;
+    min-height: 320px;
+    padding: 18px;
+    outline: none;
+    color: var(--text-color);
 }
-
 .webhacker-content:empty:before {
-  content: attr(data-placeholder);
-  color: var(--muted-color);
+    content: attr(data-placeholder);
+    color: var(--muted-color);
 }
 
-.webhacker-content p,
-.rich-content p {
-  margin: 0 0 10px;
+.webhacker-content p {
+    margin: 0 0 10px;
 }
 
-.webhacker-content a,
-.rich-content a {
-  color: var(--accent-color);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(37, 99, 235, 0.35);
+.webhacker-content a {
+    color: var(--accent-color);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(37, 99, 235, 0.35);
 }
-
-.webhacker-content a:hover,
-.rich-content a:hover {
-  border-bottom-color: currentColor;
+.webhacker-content a:hover {
+    border-bottom-color: currentColor;
 }
 
 .webhacker-content strong,
-.webhacker-content b,
-.rich-content strong,
-.rich-content b {
-  font-weight: 700;
+.webhacker-content b {
+    font-weight: 700;
 }
 
 .webhacker-content em,
-.webhacker-content i,
-.rich-content em,
-.rich-content i {
-  font-style: italic;
+.webhacker-content i {
+    font-style: italic;
 }
 
-.webhacker-content u,
-.rich-content u {
-  text-decoration: underline;
+.webhacker-content u {
+    text-decoration: underline;
 }
 
 .webhacker-content s,
-.webhacker-content del,
-.rich-content s,
-.rich-content del {
-  text-decoration: line-through;
+.webhacker-content del {
+    text-decoration: line-through;
 }
 
-.webhacker-content img,
-.rich-content img {
-  max-width: 100%;
-  border-radius: 10px;
-  box-shadow: var(--shadow-elevation);
-  display: block;
-  height: auto;
-  margin: 12px 0;
+.webhacker-content img {
+    max-width: 100%;
+    border-radius: 10px;
+    display: block;
+    height: auto;
+    margin: 12px 0;
 }
 
 .webhacker-content h1,
@@ -175,152 +152,129 @@
 .webhacker-content h3,
 .webhacker-content h4,
 .webhacker-content h5,
-.webhacker-content h6,
-.rich-content h1,
-.rich-content h2,
-.rich-content h3,
-.rich-content h4,
-.rich-content h5,
-.rich-content h6 {
-  line-height: 1.25;
-  margin: 1.2em 0 0.5em;
-  font-weight: 700;
+.webhacker-content h6 {
+    line-height: 1.25;
+    margin: 1.2em 0 0.5em;
+    font-weight: 700;
+    color: var(--text-color);
 }
-
-.webhacker-content h1,
-.rich-content h1 {
-  font-size: 32px;
-  letter-spacing: -0.01em;
+.webhacker-content h1 {
+    font-size: 32px;
+    letter-spacing: -0.01em;
 }
-
-.webhacker-content h2,
-.rich-content h2 {
-  font-size: 26px;
+.webhacker-content h2 {
+    font-size: 26px;
 }
-
-.webhacker-content h3,
-.rich-content h3 {
-  font-size: 22px;
+.webhacker-content h3 {
+    font-size: 22px;
 }
-
-.webhacker-content h4,
-.rich-content h4 {
-  font-size: 18px;
+.webhacker-content h4 {
+    font-size: 18px;
 }
-
-.webhacker-content h5,
-.rich-content h5 {
-  font-size: 16px;
+.webhacker-content h5 {
+    font-size: 16px;
 }
-
-.webhacker-content h6,
-.rich-content h6 {
-  font-size: 14px;
-  color: var(--muted-color);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.webhacker-content h6 {
+    font-size: 14px;
+    color: var(--muted-color);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
 .webhacker-content ul,
-.webhacker-content ol,
-.rich-content ul,
-.rich-content ol {
-  margin: 0 0 1em 1.4em;
-  padding: 0;
+.webhacker-content ol {
+    margin: 0 0 1em 1.4em;
+    padding: 0;
+}
+.webhacker-content li {
+    margin: 0.3em 0;
 }
 
-.webhacker-content li,
-.rich-content li {
-  margin: 0.3em 0;
+.webhacker-content blockquote {
+    margin: 1.2em 0;
+    padding: 0.6em 0.9em 0.6em 1em;
+    background: #f8fafc;
+    border-left: 4px solid #cbd5e1;
+    border-radius: 8px;
+    color: #334155;
 }
 
-.webhacker-content blockquote,
-.rich-content blockquote {
-  margin: 1.2em 0;
-  padding: 0.6em 0.9em 0.6em 1em;
-  background: #f8fafc;
-  border-left: 4px solid #cbd5e1;
-  border-radius: 8px;
-  color: #334155;
-}
-
-/* только .wh-table — без вложенных селекторов */
 .wh-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 12px 0;
-  font-size: 14px;
-  background: var(--editor-background);
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 12px 0;
+    font-size: 14px;
+    background: var(--background-color);
+    border: 1px solid var(--table-line);
+    border-radius: 12px;
+    overflow: hidden;
+    color: var(--text-color);
 }
-
 .wh-table thead th {
-  text-align: left;
-  font-weight: 600;
-  color: var(--text-color, #0b1220);
-  border-bottom: 1px solid var(--table-line, #e5e9f1);
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-color);
+    background: var(--background-color);
+    border-bottom: 1px solid var(--table-line);
 }
-
 .wh-table th,
 .wh-table td {
-  padding: 10px 12px;
-  vertical-align: top;
+    padding: 10px 12px;
+    vertical-align: top;
 }
-
 .wh-table tbody tr + tr td {
-  border-top: 1px solid var(--table-line, #e5e9f1);
+    border-top: 1px solid var(--table-line);
 }
-
+.wh-table tbody tr:hover td {
+    background: var(--background-color);
+}
 .wh-table td.is-numeric {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
 }
 
 .webhacker-color {
-  display: grid;
-  gap: 10px;
+    display: grid;
+    gap: 10px;
 }
-
 .webhacker-color__swatches {
-  display: grid;
-  grid-template-columns: repeat(13, 18px);
-  gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(13, 18px);
+    gap: 6px;
 }
-
 .webhacker-swatch {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  cursor: pointer;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
 }
-
 .webhacker-swatch[aria-selected="true"] {
-  outline: 2px solid var(--accent-color);
+    outline: 2px solid var(--accent-color);
 }
-
 .webhacker-color__row {
-  display: flex;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
 }
 
 .webhacker-input,
 .webhacker-file {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--editor-background);
-  color: var(--text-color);
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--background-color);
+    color: var(--text-color);
 }
 
 .webhacker-form {
-  display: grid;
-  gap: 8px;
+    display: grid;
+    gap: 8px;
 }
-
 .webhacker-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
 }
