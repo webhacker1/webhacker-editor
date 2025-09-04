@@ -843,6 +843,18 @@
             linkActionsRowElement
         );
         dropdownMenuElement.appendChild(linkFormElement);
+
+        const linkTriggerBtn = dropdownWrapperElement.querySelector('.webhacker-button');
+        linkTriggerBtn.addEventListener('click', () => {
+            const sel = window.getSelection();
+            let node = sel && sel.anchorNode;
+            if (node && node.nodeType === 3) node = node.parentNode;
+            const a = node && node.closest ? node.closest('a') : null;
+
+            linkUrlInputElement.value = a ? (a.getAttribute('href') || '') : '';
+            linkTextInputElement.value = a ? (a.textContent || '') : (sel && !sel.isCollapsed ? sel.toString() : '');
+        });
+
         linkConfirmButtonElement.addEventListener("click", () => {
             let hrefValue = linkUrlInputElement.value.trim();
             const labelValue = linkTextInputElement.value.trim();
@@ -870,6 +882,8 @@
             executeRichCommand("unlink");
             this.emitChange();
             this.syncToggleStates();
+            linkUrlInputElement.value = '';
+            linkTextInputElement.value = '';
         });
         return dropdownWrapperElement;
     };
@@ -906,12 +920,33 @@
             imageConfirmButtonElement,
             imageRemoveButtonElement
         );
+
+        const imageResetButtonElement = createElement(
+            "button",
+            "webhacker-button webhacker-button--ghost",
+            { type: "button" }
+        );
+        imageResetButtonElement.textContent = "Сброс";
+        imageActionsRowElement.insertBefore(imageResetButtonElement, imageRemoveButtonElement);
+
         imageFormElement.append(
             imageUrlInputElement,
             imageFileInputElement,
             imageActionsRowElement
         );
         dropdownMenuElement.appendChild(imageFormElement);
+
+        const imageTriggerBtn = dropdownWrapperElement.querySelector('.webhacker-button');
+        imageTriggerBtn.addEventListener('click', () => {
+            const sel = window.getSelection();
+            let node = sel && sel.anchorNode;
+            if (node && node.nodeType === 3) node = node.parentNode;
+            const img = node && node.closest ? node.closest('img') : null;
+
+            imageUrlInputElement.value = img ? (img.getAttribute('src') || '') : '';
+            imageFileInputElement.value = '';
+        });
+
         const insertImageAtSelection = (srcValue) => {
             this.closeAllMenus();
             this.contentEditableElement.focus();
@@ -936,6 +971,12 @@
             fileReader.onload = () => insertImageAtSelection(fileReader.result);
             fileReader.readAsDataURL(fileObject);
         });
+
+        imageResetButtonElement.addEventListener("click", () => {
+            imageUrlInputElement.value = '';
+            imageFileInputElement.value = '';
+        });
+
         imageRemoveButtonElement.addEventListener("click", () => {
             this.closeAllMenus();
             this.contentEditableElement.focus();
@@ -947,6 +988,9 @@
             if (imageElement) imageElement.remove();
             this.emitChange();
             this.syncToggleStates();
+            // ОЧИСТКА ПОЛЕЙ ПОСЛЕ УДАЛЕНИЯ
+            imageUrlInputElement.value = '';
+            imageFileInputElement.value = '';
         });
         return dropdownWrapperElement;
     };
