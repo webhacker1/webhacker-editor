@@ -148,6 +148,7 @@
         ]);
         let colorHex = null;
         let textAlign = null;
+        let textDecorationLine = null;
         for (const rule of rules) {
             const parts = rule.split(":");
             const propertyName = parts[0] ? parts[0].trim().toLowerCase() : "";
@@ -166,10 +167,16 @@
                 )
                     textAlign = val;
             }
+            if (propertyName === "text-decoration" && tagName === "span") {
+                if (/line-through/i.test(propertyValue))
+                    textDecorationLine = "line-through";
+            }
         }
         const parts = [];
         if (colorHex) parts.push(`color: ${colorHex}`);
         if (textAlign) parts.push(`text-align: ${textAlign}`);
+        if (textDecorationLine)
+            parts.push(`text-decoration: ${textDecorationLine}`);
         if (parts.length) element.setAttribute("style", parts.join("; "));
         else element.removeAttribute("style");
     }
@@ -488,9 +495,7 @@
                 true,
                 "orderedList"
             ),
-            this.createToolbarButton("fa-solid fa-table", "Таблица 2×2", () =>
-                this.insertMinimalTable()
-            )
+            this.createTableDropdown()
         );
 
         toolbarElement.append(
@@ -525,6 +530,79 @@
 
     WebHackerEditor.prototype.createSeparator = function () {
         return createElement("div", "webhacker-toolbar__separator");
+    };
+
+    WebHackerEditor.prototype.createTableDropdown = function () {
+        const { dropdownWrapperElement, dropdownMenuElement } =
+            this.createDropdown("fa-solid fa-table", "Таблица");
+        const tablePickerWrapperElement = createElement(
+            "div",
+            "webhacker-tablepick"
+        );
+        const tablePickerLabelElement = createElement(
+            "div",
+            "webhacker-tablepick__label"
+        );
+        tablePickerLabelElement.textContent = "0×0";
+        const tablePickerGridElement = createElement(
+            "div",
+            "webhacker-tablepick__grid"
+        );
+
+        const updateHighlight = (rowsSelected, colsSelected) => {
+            tablePickerLabelElement.textContent = `${rowsSelected}×${colsSelected}`;
+            tablePickerGridElement
+                .querySelectorAll(".webhacker-tablepick__cell")
+                .forEach((cellElement) => {
+                    const rowIndex = parseInt(
+                        cellElement.getAttribute("data-row"),
+                        10
+                    );
+                    const colIndex = parseInt(
+                        cellElement.getAttribute("data-col"),
+                        10
+                    );
+                    if (rowIndex <= rowsSelected && colIndex <= colsSelected) {
+                        cellElement.classList.add("is-selected");
+                    } else {
+                        cellElement.classList.remove("is-selected");
+                    }
+                });
+        };
+
+        for (let rowIndex = 1; rowIndex <= 10; rowIndex += 1) {
+            for (let colIndex = 1; colIndex <= 10; colIndex += 1) {
+                const cellElement = createElement(
+                    "button",
+                    "webhacker-tablepick__cell",
+                    {
+                        type: "button",
+                        "data-row": String(rowIndex),
+                        "data-col": String(colIndex),
+                        title: `${rowIndex}×${colIndex}`,
+                    }
+                );
+                cellElement.addEventListener("mouseenter", () =>
+                    updateHighlight(rowIndex, colIndex)
+                );
+                cellElement.addEventListener("click", () => {
+                    this.closeAllMenus();
+                    this.contentEditableElement.focus();
+                    this.restoreSelectionRange(this.currentSavedSelectionRange);
+                    this.insertMinimalTable(rowIndex, colIndex);
+                    this.emitChange();
+                    this.syncToggleStates();
+                });
+                tablePickerGridElement.appendChild(cellElement);
+            }
+        }
+
+        tablePickerWrapperElement.append(
+            tablePickerLabelElement,
+            tablePickerGridElement
+        );
+        dropdownMenuElement.appendChild(tablePickerWrapperElement);
+        return dropdownWrapperElement;
     };
 
     WebHackerEditor.prototype.createToolbarButton = function (
