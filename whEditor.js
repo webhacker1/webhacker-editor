@@ -1,18 +1,15 @@
 (function () {
     const DEFAULT_TEXT_PRESET_COLORS = [
-        "#111827",
-        "#374151",
-        "#6B7280",
-        "#9CA3AF",
-        "#D1D5DB",
-        "#F3F4F6",
-        "#FFFFFF",
         "#6A5ACD",
         "#2563EB",
-        "#0891B2",
+        "#22D3EE",
         "#10B981",
+        "#84CC16",
         "#F59E0B",
         "#EF4444",
+        "#F472B6",
+        "#A855F7",
+        "#FB7185",
     ];
 
     function createElement(tagName, className, attributes) {
@@ -59,7 +56,6 @@
         "em",
         "i",
         "u",
-        "s",
         "mark",
         "small",
         "sub",
@@ -125,13 +121,16 @@
         return null;
     }
 
-    function sanitizeStyleAttributeForElement(element) {
+    function sanitizeStyleAttributeForElement(element, options = {}) {
         if (!element.hasAttribute("style")) return;
+        const stripColors = !!options.stripColors;
+
         const tagName = element.tagName.toLowerCase();
         const rules = (element.getAttribute("style") || "")
             .split(";")
             .map((s) => s.trim())
             .filter(Boolean);
+
         const blockAlignTags = new Set([
             "p",
             "div",
@@ -146,17 +145,28 @@
             "h5",
             "h6",
         ]);
+
         let colorHex = null;
         let textAlign = null;
-        let textDecorationLine = null;
+
         for (const rule of rules) {
             const parts = rule.split(":");
             const propertyName = parts[0] ? parts[0].trim().toLowerCase() : "";
             const propertyValue = parts[1] ? parts[1].trim() : "";
-            if (propertyName === "color" && tagName === "span") {
+
+            if (
+                !stripColors &&
+                propertyName === "color" &&
+                tagName === "span"
+            ) {
                 const hex = normalizeCssColorToHex(propertyValue);
                 if (hex) colorHex = hex;
             }
+
+            if (/^background(-color)?$/.test(propertyName)) {
+                continue;
+            }
+
             if (propertyName === "text-align" && blockAlignTags.has(tagName)) {
                 const val = propertyValue.toLowerCase();
                 if (
@@ -167,26 +177,28 @@
                 )
                     textAlign = val;
             }
-            if (propertyName === "text-decoration" && tagName === "span") {
-                if (/line-through/i.test(propertyValue))
-                    textDecorationLine = "line-through";
+
+            if (propertyName === "text-decoration") {
+                continue;
             }
         }
+
         const parts = [];
         if (colorHex) parts.push(`color: ${colorHex}`);
         if (textAlign) parts.push(`text-align: ${textAlign}`);
-        if (textDecorationLine)
-            parts.push(`text-decoration: ${textDecorationLine}`);
+
         if (parts.length) element.setAttribute("style", parts.join("; "));
         else element.removeAttribute("style");
     }
 
-    function sanitizeElementAttributes(element) {
+    function sanitizeElementAttributes(element, options = {}) {
         [...element.attributes]
             .filter((attribute) => /^on/i.test(attribute.name))
             .forEach((attribute) => element.removeAttribute(attribute.name));
+
         const tagName = element.tagName.toLowerCase();
         element.removeAttribute("id");
+
         switch (tagName) {
             case "a": {
                 const hrefValue = ensureSafeUrl(
@@ -203,13 +215,21 @@
                     )
                         element.removeAttribute(attribute.name);
                 });
-                sanitizeStyleAttributeForElement(element);
+                sanitizeStyleAttributeForElement(element, options);
                 break;
             }
             case "img": {
                 const srcValue = ensureSafeUrl(
                     element.getAttribute("src") || ""
                 );
+                const isDataImage = /^data:image\//i.test(srcValue);
+                const isHttpImage =
+                    /^https?:\/\//i.test(srcValue) &&
+                    /\.(png|jpe?g|gif|webp|svg)$/i.test(srcValue);
+                if (!(isDataImage || isHttpImage)) {
+                    element.remove();
+                    break;
+                }
                 element.setAttribute("src", srcValue);
                 const altValue = element.getAttribute("alt") || "";
                 element.setAttribute("alt", altValue);
@@ -220,7 +240,7 @@
                 break;
             }
             case "span": {
-                sanitizeStyleAttributeForElement(element);
+                sanitizeStyleAttributeForElement(element, options);
                 [...element.attributes].forEach((attribute) => {
                     if (!["style"].includes(attribute.name))
                         element.removeAttribute(attribute.name);
@@ -228,9 +248,9 @@
                 break;
             }
             case "font": {
-                const hexColor = normalizeCssColorToHex(
-                    element.getAttribute("color")
-                );
+                const hexColor = options.stripColors
+                    ? null
+                    : normalizeCssColorToHex(element.getAttribute("color"));
                 if (hexColor) element.setAttribute("color", hexColor);
                 else element.removeAttribute("color");
                 [...element.attributes].forEach((attribute) => {
@@ -281,11 +301,12 @@
                     element.removeAttribute("colspan");
                 if (rowspanValue && !/^\d+$/.test(rowspanValue))
                     element.removeAttribute("rowspan");
-                sanitizeStyleAttributeForElement(element);
+
+                sanitizeStyleAttributeForElement(element, options);
                 break;
             }
             default: {
-                sanitizeStyleAttributeForElement(element);
+                sanitizeStyleAttributeForElement(element, options);
                 [...element.attributes].forEach((attribute) => {
                     if (!["style"].includes(attribute.name))
                         element.removeAttribute(attribute.name);
@@ -294,7 +315,7 @@
         }
     }
 
-    function sanitizeNodeRecursively(node) {
+    function sanitizeNodeRecursively(node, options = {}) {
         if (node.nodeType === Node.COMMENT_NODE) {
             node.remove();
             return;
@@ -308,21 +329,22 @@
                 node.replaceWith(textNode);
                 return;
             }
-            sanitizeElementAttributes(node);
+
+            sanitizeElementAttributes(node, options);
             [...node.childNodes].forEach((childNode) =>
-                sanitizeNodeRecursively(childNode)
+                sanitizeNodeRecursively(childNode, options)
             );
         } else {
             [...(node.childNodes || [])].forEach((childNode) =>
-                sanitizeNodeRecursively(childNode)
+                sanitizeNodeRecursively(childNode, options)
             );
         }
     }
 
-    function sanitizeHtmlStringToSafeHtml(htmlString) {
+    function sanitizeHtmlStringToSafeHtml(htmlString, options = {}) {
         const templateElement = document.createElement("template");
         templateElement.innerHTML = String(htmlString || "");
-        sanitizeNodeRecursively(templateElement.content);
+        sanitizeNodeRecursively(templateElement.content, options);
         return templateElement.innerHTML;
     }
 
@@ -424,13 +446,6 @@
                 () => executeRichCommand("underline"),
                 true,
                 "underline"
-            ),
-            this.createToolbarButton(
-                "fa-solid fa-strikethrough",
-                "Зачеркнуть",
-                () => executeRichCommand("strikeThrough"),
-                true,
-                "strikeThrough"
             ),
             this.createColorDropdown(),
             this.createLinkDropdown(),
@@ -699,89 +714,8 @@
             "div",
             "webhacker-color__swatches"
         );
-        DEFAULT_TEXT_PRESET_COLORS.forEach((hexColor) => {
-            const swatchButtonElement = createElement(
-                "button",
-                "webhacker-swatch",
-                { type: "button", "data-color": hexColor, title: hexColor }
-            );
-            swatchButtonElement.style.background = hexColor;
-            swatchButtonElement.addEventListener("click", () => {
-                swatchesContainerElement
-                    .querySelectorAll(".webhacker-swatch")
-                    .forEach((node) => node.removeAttribute("aria-selected"));
-                swatchButtonElement.setAttribute("aria-selected", "true");
-                colorHexInputElement.value = hexColor.toUpperCase();
-                colorPickerInputElement.value = hexColor;
-                colorPreviewElement.style.color = hexColor;
-            });
-            swatchButtonElement.addEventListener("dblclick", () =>
-                applySelectedColorAndClose(hexColor)
-            );
-            swatchesContainerElement.appendChild(swatchButtonElement);
-        });
-        const colorPreviewElement = createElement(
-            "div",
-            "webhacker-color__preview"
-        );
-        colorPreviewElement.textContent = "Aa";
-        colorPreviewElement.style.color = "#6a5acd";
-        const colorRowElement = createElement("div", "webhacker-color__row");
-        const colorHexInputElement = createElement("input", "webhacker-input", {
-            type: "text",
-            maxlength: "7",
-            value: "#6a5acd",
-            placeholder: "#RRGGBB",
-            "aria-label": "HEX цвет",
-        });
-        const colorPickerInputElement = createElement("input", null, {
-            type: "color",
-            value: "#6a5acd",
-            "aria-label": "Выбрать цвет",
-        });
-        colorRowElement.append(colorHexInputElement, colorPickerInputElement);
-        const colorActionsRowElement = createElement(
-            "div",
-            "webhacker-actions"
-        );
-        const confirmButtonElement = createElement(
-            "button",
-            "webhacker-button webhacker-button--primary",
-            { type: "button" }
-        );
-        confirmButtonElement.textContent = "OK";
-        const resetButtonElement = createElement(
-            "button",
-            "webhacker-button webhacker-button--ghost",
-            { type: "button" }
-        );
-        resetButtonElement.textContent = "Сброс";
-        colorActionsRowElement.append(confirmButtonElement, resetButtonElement);
-        colorContainerElement.append(
-            swatchesContainerElement,
-            colorPreviewElement,
-            colorRowElement,
-            colorActionsRowElement
-        );
-        dropdownMenuElement.appendChild(colorContainerElement);
-        function handleHexInputChange() {
-            const value = colorHexInputElement.value.trim();
-            if (!/^#[0-9a-fA-F]{6}$/.test(value)) return;
-            colorPickerInputElement.value = value;
-            colorPreviewElement.style.color = value;
-        }
-        function handlePickerInputChange() {
-            const value = colorPickerInputElement.value;
-            colorHexInputElement.value = value.toUpperCase();
-            colorPreviewElement.style.color = value;
-        }
-        colorHexInputElement.addEventListener("input", handleHexInputChange);
-        colorPickerInputElement.addEventListener(
-            "input",
-            handlePickerInputChange
-        );
+
         const applySelectedColorAndClose = (hexColor) => {
-            if (!/^#[0-9a-fA-F]{6}$/.test(hexColor)) return;
             this.closeAllMenus();
             this.contentEditableElement.focus();
             this.restoreSelectionRange(this.currentSavedSelectionRange);
@@ -789,22 +723,26 @@
             this.emitChange();
             this.syncToggleStates();
         };
-        confirmButtonElement.addEventListener("click", () => {
-            const hexColor = colorHexInputElement.value.trim();
-            if (!/^#[0-9a-fA-F]{6}$/.test(hexColor)) {
-                colorHexInputElement.focus();
-                return;
-            }
-            applySelectedColorAndClose(hexColor);
+
+        DEFAULT_TEXT_PRESET_COLORS.forEach((hexColor) => {
+            const swatchButtonElement = createElement(
+                "button",
+                "webhacker-swatch",
+                {
+                    type: "button",
+                    "data-color": hexColor,
+                    title: hexColor,
+                }
+            );
+            swatchButtonElement.style.background = hexColor;
+            swatchButtonElement.addEventListener("click", () =>
+                applySelectedColorAndClose(hexColor)
+            );
+            swatchesContainerElement.appendChild(swatchButtonElement);
         });
-        resetButtonElement.addEventListener("click", () => {
-            this.closeAllMenus();
-            this.contentEditableElement.focus();
-            this.restoreSelectionRange(this.currentSavedSelectionRange);
-            executeRichCommand("removeFormat");
-            this.emitChange();
-            this.syncToggleStates();
-        });
+
+        colorContainerElement.append(swatchesContainerElement);
+        dropdownMenuElement.appendChild(colorContainerElement);
         return dropdownWrapperElement;
     };
 
@@ -844,15 +782,20 @@
         );
         dropdownMenuElement.appendChild(linkFormElement);
 
-        const linkTriggerBtn = dropdownWrapperElement.querySelector('.webhacker-button');
-        linkTriggerBtn.addEventListener('click', () => {
+        const linkTriggerBtn =
+            dropdownWrapperElement.querySelector(".webhacker-button");
+        linkTriggerBtn.addEventListener("click", () => {
             const sel = window.getSelection();
             let node = sel && sel.anchorNode;
             if (node && node.nodeType === 3) node = node.parentNode;
-            const a = node && node.closest ? node.closest('a') : null;
+            const a = node && node.closest ? node.closest("a") : null;
 
-            linkUrlInputElement.value = a ? (a.getAttribute('href') || '') : '';
-            linkTextInputElement.value = a ? (a.textContent || '') : (sel && !sel.isCollapsed ? sel.toString() : '');
+            linkUrlInputElement.value = a ? a.getAttribute("href") || "" : "";
+            linkTextInputElement.value = a
+                ? a.textContent || ""
+                : sel && !sel.isCollapsed
+                ? sel.toString()
+                : "";
         });
 
         linkConfirmButtonElement.addEventListener("click", () => {
@@ -882,8 +825,8 @@
             executeRichCommand("unlink");
             this.emitChange();
             this.syncToggleStates();
-            linkUrlInputElement.value = '';
-            linkTextInputElement.value = '';
+            linkUrlInputElement.value = "";
+            linkTextInputElement.value = "";
         });
         return dropdownWrapperElement;
     };
@@ -910,6 +853,12 @@
             { type: "button" }
         );
         imageConfirmButtonElement.textContent = "OK";
+        const imageResetButtonElement = createElement(
+            "button",
+            "webhacker-button webhacker-button--ghost",
+            { type: "button" }
+        );
+        imageResetButtonElement.textContent = "Сброс";
         const imageRemoveButtonElement = createElement(
             "button",
             "webhacker-button webhacker-button--ghost",
@@ -918,17 +867,9 @@
         imageRemoveButtonElement.textContent = "Удалить";
         imageActionsRowElement.append(
             imageConfirmButtonElement,
+            imageResetButtonElement,
             imageRemoveButtonElement
         );
-
-        const imageResetButtonElement = createElement(
-            "button",
-            "webhacker-button webhacker-button--ghost",
-            { type: "button" }
-        );
-        imageResetButtonElement.textContent = "Сброс";
-        imageActionsRowElement.insertBefore(imageResetButtonElement, imageRemoveButtonElement);
-
         imageFormElement.append(
             imageUrlInputElement,
             imageFileInputElement,
@@ -936,18 +877,25 @@
         );
         dropdownMenuElement.appendChild(imageFormElement);
 
-        const imageTriggerBtn = dropdownWrapperElement.querySelector('.webhacker-button');
-        imageTriggerBtn.addEventListener('click', () => {
+        const imageTriggerBtn =
+            dropdownWrapperElement.querySelector(".webhacker-button");
+        imageTriggerBtn.addEventListener("click", () => {
             const sel = window.getSelection();
             let node = sel && sel.anchorNode;
             if (node && node.nodeType === 3) node = node.parentNode;
-            const img = node && node.closest ? node.closest('img') : null;
-
-            imageUrlInputElement.value = img ? (img.getAttribute('src') || '') : '';
-            imageFileInputElement.value = '';
+            const img = node && node.closest ? node.closest("img") : null;
+            imageUrlInputElement.value = img
+                ? img.getAttribute("src") || ""
+                : "";
+            imageFileInputElement.value = "";
         });
 
         const insertImageAtSelection = (srcValue) => {
+            const isDataImage = /^data:image\//i.test(srcValue);
+            const isHttpImage =
+                /^https?:\/\//i.test(srcValue) &&
+                /\.(png|jpe?g|gif|webp|svg)$/i.test(srcValue);
+            if (!(isDataImage || isHttpImage)) return;
             this.closeAllMenus();
             this.contentEditableElement.focus();
             this.restoreSelectionRange(this.currentSavedSelectionRange);
@@ -966,15 +914,15 @@
             }
             const fileObject =
                 imageFileInputElement.files && imageFileInputElement.files[0];
-            if (!fileObject) return;
+            if (!fileObject || !/^image\//i.test(fileObject.type)) return; // строго только изображения
             const fileReader = new FileReader();
             fileReader.onload = () => insertImageAtSelection(fileReader.result);
             fileReader.readAsDataURL(fileObject);
         });
 
         imageResetButtonElement.addEventListener("click", () => {
-            imageUrlInputElement.value = '';
-            imageFileInputElement.value = '';
+            imageUrlInputElement.value = "";
+            imageFileInputElement.value = "";
         });
 
         imageRemoveButtonElement.addEventListener("click", () => {
@@ -988,9 +936,8 @@
             if (imageElement) imageElement.remove();
             this.emitChange();
             this.syncToggleStates();
-            // ОЧИСТКА ПОЛЕЙ ПОСЛЕ УДАЛЕНИЯ
-            imageUrlInputElement.value = '';
-            imageFileInputElement.value = '';
+            imageUrlInputElement.value = "";
+            imageFileInputElement.value = "";
         });
         return dropdownWrapperElement;
     };
@@ -1033,7 +980,9 @@
             const htmlData = clipboardData.getData("text/html");
             const textData = clipboardData.getData("text/plain");
             if (htmlData) {
-                const safeHtml = sanitizeHtmlStringToSafeHtml(htmlData);
+                const safeHtml = sanitizeHtmlStringToSafeHtml(htmlData, {
+                    stripColors: true,
+                });
                 document.execCommand("insertHTML", false, safeHtml);
             } else if (textData) {
                 const safeTextHtml = escapeHtml(textData).replace(
@@ -1117,7 +1066,6 @@
         updateToggleButton("bold", readCommandState("bold"));
         updateToggleButton("italic", readCommandState("italic"));
         updateToggleButton("underline", readCommandState("underline"));
-        updateToggleButton("strikeThrough", readCommandState("strikeThrough"));
         updateToggleButton(
             "unorderedList",
             readCommandState("insertUnorderedList")

@@ -125,24 +125,14 @@
 .webhacker-content b {
     font-weight: 700;
 }
-
 .webhacker-content em,
 .webhacker-content i {
     font-style: italic;
 }
-
 .webhacker-content u {
     text-decoration: underline;
 }
 
-.webhacker-content s,
-.webhacker-content del {
-    text-decoration: line-through;
-}
-
-.webhacker-content strike {
-    text-decoration: line-through;
-}
 
 .webhacker-content img {
     max-width: 100%;
@@ -215,7 +205,6 @@
     margin: 16px auto;
     max-width: 100%;
 }
-
 .wh-table th,
 .wh-table td {
     padding: 10px 14px;
@@ -224,20 +213,16 @@
     border-bottom: 1px solid var(--table-line);
     word-break: break-word;
 }
-
 .wh-table thead th {
     font-weight: 600;
 }
-
 .wh-table th:last-child,
 .wh-table td:last-child {
     border-right: 0;
 }
-
 .wh-table tr:last-child td {
     border-bottom: 0;
 }
-
 .wh-table + .wh-table {
     margin-top: 20px;
 }
@@ -248,7 +233,7 @@
 }
 .webhacker-color__swatches {
     display: grid;
-    grid-template-columns: repeat(13, 18px);
+    grid-template-columns: repeat(10, 18px);
     gap: 6px;
 }
 .webhacker-swatch {
@@ -260,10 +245,6 @@
 }
 .webhacker-swatch[aria-selected="true"] {
     outline: 2px solid var(--accent-color);
-}
-.webhacker-color__row {
-    display: flex;
-    gap: 8px;
 }
 
 .webhacker-input,
