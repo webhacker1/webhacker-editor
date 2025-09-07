@@ -228,40 +228,6 @@
     color: #334155;
 }
 
-.wh-table {
-    display: inline-table;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: var(--background-color);
-    color: var(--text-color);
-    border: 1px solid var(--table-line);
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 16px auto;
-    max-width: 100%;
-}
-.wh-table th,
-.wh-table td {
-    padding: 10px 14px;
-    vertical-align: top;
-    border-right: 1px solid var(--table-line);
-    border-bottom: 1px solid var(--table-line);
-    word-break: break-word;
-}
-.wh-table thead th {
-    font-weight: 600;
-}
-.wh-table th:last-child,
-.wh-table td:last-child {
-    border-right: 0;
-}
-.wh-table tr:last-child td {
-    border-bottom: 0;
-}
-.wh-table + .wh-table {
-    margin-top: 20px;
-}
-
 .webhacker-color {
     display: grid;
     gap: 10px;
@@ -341,4 +307,75 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.wh-table {
+    display: inline-table;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    color: var(--text-color);
+    border: 2px solid var(--table-line);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 16px auto;
+    max-width: 100%;
+}
+.wh-table thead th {
+    background: #f8fafc;
+    font-weight: 700;
+    border-bottom: 2px solid var(--table-line);
+    text-align: left;
+    white-space: nowrap;
+}
+.wh-table th,
+.wh-table td {
+    padding: 12px 16px;
+    vertical-align: top;
+    border-right: 1px solid var(--table-line);
+    border-bottom: 1px solid var(--table-line);
+    word-break: break-word;
+}
+.wh-table th:last-child,
+.wh-table td:last-child {
+    border-right: 0;
+}
+.wh-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+.wh-table tbody tr:nth-child(even) {
+    background: var(--background-color);
+}
+.wh-table tbody tr:hover {
+    background: rgba(37, 99, 235, 0.06);
+}
+.wh-table .is-numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.webhacker-button[data-tooltip] {
+    position: relative;
+}
+.webhacker-button[data-tooltip]:not([aria-disabled="true"])::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translate(-50%, -4px);
+    background: #1e2251;
+    color: #fff;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 30;
+}
+.webhacker-button[data-tooltip]:hover::after,
+.webhacker-button[data-tooltip]:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
 }

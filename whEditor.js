@@ -547,7 +547,6 @@
     WebHackerEditor.prototype.createDisabledImageButton = function () {
         const buttonElement = createElement("button", "webhacker-button", {
             type: "button",
-            title: "Скоро",
             "aria-label": "Изображение (скоро)",
             "aria-disabled": "true",
             "data-tooltip": "Скоро",
@@ -609,7 +608,7 @@
                         type: "button",
                         "data-row": String(rowIndex),
                         "data-col": String(colIndex),
-                        title: `${rowIndex}×${colIndex}`,
+                        "aria-label": `${rowIndex}×${colIndex}`
                     }
                 );
                 cellElement.addEventListener("mouseenter", () =>
@@ -644,8 +643,8 @@
     ) {
         const buttonElement = createElement("button", "webhacker-button", {
             type: "button",
-            title: buttonTitleText,
             "aria-label": buttonTitleText,
+            "data-tooltip": buttonTitleText
         });
         const iconElement = createElement("i", iconClassName);
         buttonElement.appendChild(iconElement);
