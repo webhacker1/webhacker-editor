@@ -69,6 +69,42 @@
     background: transparent;
 }
 
+.webhacker-button[disabled],
+.webhacker-button[aria-disabled="true"] {
+    cursor: not-allowed;
+    position: relative;
+}
+
+.webhacker-button[disabled] > i,
+.webhacker-button[aria-disabled="true"] > i {
+    opacity: 0.5;
+}
+
+.webhacker-button[disabled]:hover,
+.webhacker-button[aria-disabled="true"]:hover {
+    background: var(--background-color);
+}
+.webhacker-button[aria-disabled="true"]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e2251;
+    color: #fff;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 30;
+}
+.webhacker-button[aria-disabled="true"]:hover::after {
+    opacity: 1;
+}
+
 .webhacker-dropdown {
     position: relative;
 }
@@ -132,7 +168,6 @@
 .webhacker-content u {
     text-decoration: underline;
 }
-
 
 .webhacker-content img {
     max-width: 100%;
@@ -293,4 +328,17 @@
 .webhacker-tablepick__cell.is-selected {
     background: var(--accent-color);
     border-color: var(--accent-color);
+}
+
+.webhacker-badge--beta {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    background: #fea530;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }

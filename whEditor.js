@@ -449,12 +449,7 @@
             ),
             this.createColorDropdown(),
             this.createLinkDropdown(),
-            this.createImageDropdown(),
-            this.createToolbarButton(
-                "fa-solid fa-eraser",
-                "Очистить форматирование",
-                () => executeRichCommand("removeFormat")
-            )
+            this.createDisabledImageButton()
         );
 
         const structureGroupElement = createElement(
@@ -525,6 +520,12 @@
             listsGroupElement
         );
 
+        const betaBadge = createElement("span", "webhacker-badge--beta", {
+            title: "Скоро",
+        });
+        betaBadge.textContent = "БЕТА";
+        toolbarElement.append(betaBadge);
+
         const contentEditableElement = createElement(
             "div",
             "webhacker-content",
@@ -541,6 +542,20 @@
         this.editorRootElement = editorRootElement;
         this.toolbarElement = toolbarElement;
         this.contentEditableElement = contentEditableElement;
+    };
+
+    WebHackerEditor.prototype.createDisabledImageButton = function () {
+        const buttonElement = createElement("button", "webhacker-button", {
+            type: "button",
+            title: "Скоро",
+            "aria-label": "Изображение (скоро)",
+            "aria-disabled": "true",
+            "data-tooltip": "Скоро",
+        });
+        const iconElement = createElement("i", "fa-solid fa-image");
+        buttonElement.appendChild(iconElement);
+        buttonElement.disabled = true;
+        return buttonElement;
     };
 
     WebHackerEditor.prototype.createSeparator = function () {
@@ -831,117 +846,6 @@
         return dropdownWrapperElement;
     };
 
-    WebHackerEditor.prototype.createImageDropdown = function () {
-        const { dropdownWrapperElement, dropdownMenuElement } =
-            this.createDropdown("fa-solid fa-image", "Изображение");
-        const imageFormElement = createElement("div", "webhacker-form");
-        const imageUrlInputElement = createElement("input", "webhacker-input", {
-            type: "text",
-            placeholder: "URL изображения",
-        });
-        const imageFileInputElement = createElement("input", "webhacker-file", {
-            type: "file",
-            accept: "image/*",
-        });
-        const imageActionsRowElement = createElement(
-            "div",
-            "webhacker-actions"
-        );
-        const imageConfirmButtonElement = createElement(
-            "button",
-            "webhacker-button webhacker-button--primary",
-            { type: "button" }
-        );
-        imageConfirmButtonElement.textContent = "OK";
-        const imageResetButtonElement = createElement(
-            "button",
-            "webhacker-button webhacker-button--ghost",
-            { type: "button" }
-        );
-        imageResetButtonElement.textContent = "Сброс";
-        const imageRemoveButtonElement = createElement(
-            "button",
-            "webhacker-button webhacker-button--ghost",
-            { type: "button" }
-        );
-        imageRemoveButtonElement.textContent = "Удалить";
-        imageActionsRowElement.append(
-            imageConfirmButtonElement,
-            imageResetButtonElement,
-            imageRemoveButtonElement
-        );
-        imageFormElement.append(
-            imageUrlInputElement,
-            imageFileInputElement,
-            imageActionsRowElement
-        );
-        dropdownMenuElement.appendChild(imageFormElement);
-
-        const imageTriggerBtn =
-            dropdownWrapperElement.querySelector(".webhacker-button");
-        imageTriggerBtn.addEventListener("click", () => {
-            const sel = window.getSelection();
-            let node = sel && sel.anchorNode;
-            if (node && node.nodeType === 3) node = node.parentNode;
-            const img = node && node.closest ? node.closest("img") : null;
-            imageUrlInputElement.value = img
-                ? img.getAttribute("src") || ""
-                : "";
-            imageFileInputElement.value = "";
-        });
-
-        const insertImageAtSelection = (srcValue) => {
-            const isDataImage = /^data:image\//i.test(srcValue);
-            const isHttpImage =
-                /^https?:\/\//i.test(srcValue) &&
-                /\.(png|jpe?g|gif|webp|svg)$/i.test(srcValue);
-            if (!(isDataImage || isHttpImage)) return;
-            this.closeAllMenus();
-            this.contentEditableElement.focus();
-            this.restoreSelectionRange(this.currentSavedSelectionRange);
-            executeRichCommand(
-                "insertHTML",
-                `<img src="${escapeHtml(srcValue)}" alt="">`
-            );
-            this.emitChange();
-            this.syncToggleStates();
-        };
-        imageConfirmButtonElement.addEventListener("click", () => {
-            const urlValue = imageUrlInputElement.value.trim();
-            if (urlValue) {
-                insertImageAtSelection(ensureSafeUrl(urlValue));
-                return;
-            }
-            const fileObject =
-                imageFileInputElement.files && imageFileInputElement.files[0];
-            if (!fileObject || !/^image\//i.test(fileObject.type)) return; // строго только изображения
-            const fileReader = new FileReader();
-            fileReader.onload = () => insertImageAtSelection(fileReader.result);
-            fileReader.readAsDataURL(fileObject);
-        });
-
-        imageResetButtonElement.addEventListener("click", () => {
-            imageUrlInputElement.value = "";
-            imageFileInputElement.value = "";
-        });
-
-        imageRemoveButtonElement.addEventListener("click", () => {
-            this.closeAllMenus();
-            this.contentEditableElement.focus();
-            this.restoreSelectionRange(this.currentSavedSelectionRange);
-            const selection = window.getSelection();
-            let node = selection && selection.anchorNode;
-            if (node && node.nodeType === 3) node = node.parentNode;
-            const imageElement = node ? node.closest("img") : null;
-            if (imageElement) imageElement.remove();
-            this.emitChange();
-            this.syncToggleStates();
-            imageUrlInputElement.value = "";
-            imageFileInputElement.value = "";
-        });
-        return dropdownWrapperElement;
-    };
-
     WebHackerEditor.prototype.toggleMenu = function (dropdownMenuElement) {
         this.closeAllMenus(dropdownMenuElement);
         dropdownMenuElement.classList.toggle("webhacker-menu--hidden");
@@ -974,6 +878,7 @@
             this.emitChange();
             this.syncToggleStates();
         });
+
         this.contentEditableElement.addEventListener("paste", (event) => {
             event.preventDefault();
             const clipboardData = event.clipboardData || window.clipboardData;
@@ -994,24 +899,71 @@
             this.emitChange();
             this.syncToggleStates();
         });
+
         ["mouseup", "keyup"].forEach((eventName) => {
             this.contentEditableElement.addEventListener(eventName, () =>
                 this.syncToggleStates()
             );
         });
+
+        this.contentEditableElement.addEventListener("mousedown", (event) => {
+            const targetCellElement =
+                event.target && event.target.closest
+                    ? event.target.closest("td,th")
+                    : null;
+            if (targetCellElement) {
+                this.ensureCaretAnchorInTableCell(targetCellElement, false);
+            }
+        });
+
         document.addEventListener("selectionchange", () => {
             const selection = window.getSelection();
             if (!selection || selection.rangeCount === 0) return;
+
             const anchorNode =
                 selection.anchorNode && selection.anchorNode.nodeType === 3
                     ? selection.anchorNode.parentNode
                     : selection.anchorNode;
-            if (anchorNode && this.contentEditableElement.contains(anchorNode))
+
+            if (
+                anchorNode &&
+                this.contentEditableElement.contains(anchorNode)
+            ) {
                 this.syncToggleStates();
+
+                const tableCellElement =
+                    anchorNode.closest && anchorNode.closest("td,th");
+                if (tableCellElement) {
+                    this.ensureCaretAnchorInTableCell(tableCellElement, false);
+                }
+            }
         });
+
         this.contentEditableElement.addEventListener("keydown", (event) => {
             const pressedKey = event.key.toLowerCase();
             const hasCommandModifier = event.ctrlKey || event.metaKey;
+
+            if (event.key === "Enter" && !event.shiftKey) {
+                const sel = window.getSelection();
+                if (sel && sel.rangeCount) {
+                    let node = sel.anchorNode;
+                    if (node && node.nodeType === 3) node = node.parentNode;
+                    const li = node && node.closest ? node.closest("li") : null;
+                    if (li) {
+                        const text = li.textContent
+                            .replace(/\u200B/g, "")
+                            .trim();
+                        if (text === "") {
+                            event.preventDefault();
+                            executeRichCommand("outdent");
+                            this.emitChange();
+                            this.syncToggleStates();
+                            return;
+                        }
+                    }
+                }
+            }
+
             if (hasCommandModifier && pressedKey === "b") {
                 event.preventDefault();
                 executeRichCommand("bold");
@@ -1083,24 +1035,89 @@
         rowCount = 2,
         columnCount = 2
     ) {
-        let tableHeadHtml = "<thead><tr>";
-        for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1)
-            tableHeadHtml += "<th>Заголовок</th>";
-        tableHeadHtml += "</tr></thead>";
-        let tableBodyHtml = "<tbody>";
+        const tableElement = document.createElement("table");
+        tableElement.className = "wh-table";
+
+        const tableHeadElement = document.createElement("thead");
+        const headerRowElement = document.createElement("tr");
+        for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
+            const headerCellElement = document.createElement("th");
+            headerRowElement.appendChild(headerCellElement);
+        }
+        tableHeadElement.appendChild(headerRowElement);
+        tableElement.appendChild(tableHeadElement);
+
+        const tableBodyElement = document.createElement("tbody");
         for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
-            tableBodyHtml += "<tr>";
+            const bodyRowElement = document.createElement("tr");
             for (
                 let columnIndex = 0;
                 columnIndex < columnCount;
                 columnIndex += 1
-            )
-                tableBodyHtml += "<td>Ячейка</td>";
-            tableBodyHtml += "</tr>";
+            ) {
+                const bodyCellElement = document.createElement("td");
+                bodyRowElement.appendChild(bodyCellElement);
+            }
+            tableBodyElement.appendChild(bodyRowElement);
         }
-        tableBodyHtml += "</tbody>";
-        const htmlToInsert = `<table class="wh-table">${tableHeadHtml}${tableBodyHtml}</table>`;
-        document.execCommand("insertHTML", false, htmlToInsert);
+        tableElement.appendChild(tableBodyElement);
+
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount) {
+            const insertionRange = selection.getRangeAt(0);
+            insertionRange.deleteContents();
+            insertionRange.insertNode(tableElement);
+        } else {
+            this.contentEditableElement.appendChild(tableElement);
+        }
+
+        const firstCellElement =
+            tableElement.querySelector("thead th") ||
+            tableElement.querySelector("tbody td");
+
+        if (firstCellElement) {
+            if (firstCellElement.childNodes.length === 0) {
+                const zeroWidthSpaceTextNode =
+                    document.createTextNode("\u200B");
+                firstCellElement.appendChild(zeroWidthSpaceTextNode);
+            }
+
+            const caretTextNode = firstCellElement.firstChild;
+            const selectionRange = document.createRange();
+            selectionRange.setStart(
+                caretTextNode,
+                caretTextNode.nodeValue.length
+            );
+            selectionRange.collapse(true);
+
+            const windowSelection = window.getSelection();
+            windowSelection.removeAllRanges();
+            windowSelection.addRange(selectionRange);
+        }
+    };
+
+    WebHackerEditor.prototype.ensureCaretAnchorInTableCell = function (
+        cellElement,
+        shouldPlaceCaret = false
+    ) {
+        if (!cellElement) return;
+
+        let textNode = cellElement.firstChild;
+        if (!textNode || textNode.nodeType !== 3) {
+            textNode = document.createTextNode("\u200B");
+            cellElement.insertBefore(textNode, cellElement.firstChild || null);
+        } else if (textNode.nodeValue.length === 0) {
+            textNode.nodeValue = "\u200B";
+        }
+
+        if (shouldPlaceCaret) {
+            const selectionRange = document.createRange();
+            selectionRange.setStart(textNode, textNode.nodeValue.length);
+            selectionRange.collapse(true);
+            const windowSelection = window.getSelection();
+            windowSelection.removeAllRanges();
+            windowSelection.addRange(selectionRange);
+        }
     };
 
     WebHackerEditor.prototype.saveSelectionRange = function () {
