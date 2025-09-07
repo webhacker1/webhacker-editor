@@ -4,7 +4,7 @@
     --muted-color: #6b7280;
     --accent-color: #2563eb;
     --background-color: #f3f6fb;
-    --table-line: #e5e9f1;
+    --table-line: #afb0b3;
 }
 
 * {
@@ -313,45 +313,35 @@
     display: inline-table;
     border-collapse: separate;
     border-spacing: 0;
-    background: #fff;
+    background: var(--background-color);
     color: var(--text-color);
     border: 2px solid var(--table-line);
-    border-radius: 12px;
+    border-radius: 10px;
     overflow: hidden;
     margin: 16px auto;
     max-width: 100%;
 }
-.wh-table thead th {
-    background: #f8fafc;
-    font-weight: 700;
-    border-bottom: 2px solid var(--table-line);
-    text-align: left;
-    white-space: nowrap;
-}
 .wh-table th,
 .wh-table td {
-    padding: 12px 16px;
+    padding: 10px 14px;
     vertical-align: top;
     border-right: 1px solid var(--table-line);
     border-bottom: 1px solid var(--table-line);
     word-break: break-word;
 }
+.wh-table thead th {
+    font-weight: 600;
+    border-bottom: 2px solid var(--table-line);
+}
 .wh-table th:last-child,
 .wh-table td:last-child {
     border-right: 0;
 }
-.wh-table tbody tr:last-child td {
+.wh-table tr:last-child td {
     border-bottom: 0;
 }
-.wh-table tbody tr:nth-child(even) {
-    background: var(--background-color);
-}
-.wh-table tbody tr:hover {
-    background: rgba(37, 99, 235, 0.06);
-}
-.wh-table .is-numeric {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
+.wh-table + .wh-table {
+    margin-top: 20px;
 }
 
 .webhacker-button[data-tooltip] {
