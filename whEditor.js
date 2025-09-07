@@ -1038,23 +1038,10 @@
         const tableElement = document.createElement("table");
         tableElement.className = "wh-table";
 
-        const tableHeadElement = document.createElement("thead");
-        const headerRowElement = document.createElement("tr");
-        for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
-            const headerCellElement = document.createElement("th");
-            headerRowElement.appendChild(headerCellElement);
-        }
-        tableHeadElement.appendChild(headerRowElement);
-        tableElement.appendChild(tableHeadElement);
-
         const tableBodyElement = document.createElement("tbody");
         for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
             const bodyRowElement = document.createElement("tr");
-            for (
-                let columnIndex = 0;
-                columnIndex < columnCount;
-                columnIndex += 1
-            ) {
+            for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
                 const bodyCellElement = document.createElement("td");
                 bodyRowElement.appendChild(bodyCellElement);
             }
@@ -1071,25 +1058,15 @@
             this.contentEditableElement.appendChild(tableElement);
         }
 
-        const firstCellElement =
-            tableElement.querySelector("thead th") ||
-            tableElement.querySelector("tbody td");
-
+        const firstCellElement = tableElement.querySelector("tbody td");
         if (firstCellElement) {
             if (firstCellElement.childNodes.length === 0) {
-                const zeroWidthSpaceTextNode =
-                    document.createTextNode("\u200B");
-                firstCellElement.appendChild(zeroWidthSpaceTextNode);
+                firstCellElement.appendChild(document.createTextNode("\u200B"));
             }
-
             const caretTextNode = firstCellElement.firstChild;
             const selectionRange = document.createRange();
-            selectionRange.setStart(
-                caretTextNode,
-                caretTextNode.nodeValue.length
-            );
+            selectionRange.setStart(caretTextNode, caretTextNode.nodeValue.length);
             selectionRange.collapse(true);
-
             const windowSelection = window.getSelection();
             windowSelection.removeAllRanges();
             windowSelection.addRange(selectionRange);
