@@ -361,7 +361,9 @@
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
     z-index: 30;
 }
 .webhacker-button[data-tooltip]:hover::after,

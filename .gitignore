@@ -1,2 +1,4 @@
 index.html
 view.html
+node_modules/
+*.log
