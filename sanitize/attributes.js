@@ -10,6 +10,17 @@ export function sanitizeElementAttributes(element, options = {}) {
     const tagName = element.tagName.toLowerCase();
     element.removeAttribute("id");
 
+    const styleValue = element.getAttribute("style");
+    if (styleValue) {
+        const cleanedStyle = styleValue
+            .split(";")
+            .map(s => s.trim())
+            .filter(s => s && !/^font-family\s*:/i.test(s))
+            .join("; ");
+        if (cleanedStyle) element.setAttribute("style", cleanedStyle);
+        else element.removeAttribute("style");
+    }
+
     switch (tagName) {
         case "a": {
             const hrefValue = ensureSafeUrl(element.getAttribute("href") || "");
@@ -49,6 +60,7 @@ export function sanitizeElementAttributes(element, options = {}) {
             break;
         }
         case "font": {
+            element.removeAttribute("face");
             const hexColor = options.stripColors
                 ? null
                 : normalizeCssColorToHex(element.getAttribute("color"));
