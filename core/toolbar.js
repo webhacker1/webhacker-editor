@@ -55,11 +55,15 @@ WebHackerEditor.prototype.createToolbarButton = function (
     const iconElement = createElement("i", iconClassName);
     buttonElement.appendChild(iconElement);
     buttonElement.addEventListener("mousedown", event => event.preventDefault());
-    buttonElement.addEventListener("click", () => {
+    buttonElement.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const scrollY = window.scrollY;
         this.contentEditableElement.focus();
         onClickHandler();
         this.emitChange();
         this.syncToggleStates();
+        window.scrollTo(0, scrollY);
     });
     if (trackToggleState && toggleKey) this.trackedToggleButtonsMap[toggleKey] = buttonElement;
     return buttonElement;

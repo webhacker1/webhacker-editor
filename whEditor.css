@@ -26,9 +26,11 @@
     padding: 10px;
     background: var(--background-color);
     border-bottom: 1px solid var(--border-color);
+    border-radius: 14px;
     align-items: center;
     flex-wrap: wrap;
     color: var(--text-color);
+    z-index: 1;
 }
 
 .webhacker-toolbar__group {
@@ -113,7 +115,6 @@
     position: absolute;
     top: 40px;
     left: 0;
-    min-width: 240px;
     background: var(--background-color);
     border: 1px solid var(--border-color);
     border-radius: 12px;
@@ -142,6 +143,10 @@
 .webhacker-content:empty:before {
     content: attr(data-placeholder);
     color: var(--muted-color);
+}
+
+.webhacker-toolbar--fixed + .webhacker-content {
+    padding-top: var(--toolbar-height, 50px);
 }
 
 .webhacker-content p {
@@ -234,7 +239,7 @@
 }
 .webhacker-color__swatches {
     display: grid;
-    grid-template-columns: repeat(10, 18px);
+    grid-template-columns: repeat(5, 18px);
     gap: 6px;
 }
 .webhacker-swatch {
@@ -250,8 +255,8 @@
 
 .webhacker-input,
 .webhacker-file {
-    width: 100%;
     padding: 8px;
+    width: 180px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background: var(--background-color);
@@ -370,4 +375,17 @@
 .webhacker-button[data-tooltip]:focus-visible::after {
     opacity: 1;
     transform: translate(-50%, 0);
+}
+
+.webhacker-content {
+    position: relative;
+}
+
+.webhacker-toolbar--fixed {
+    position: fixed;
+    top: 0;
+    right: 0;
+    margin: 1vh 2vw;
+    background: var(--secondary-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
