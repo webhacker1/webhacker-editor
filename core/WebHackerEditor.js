@@ -162,11 +162,47 @@ WebHackerEditor.prototype.renderEditorInterface = function () {
     this.editorRootElement = editorRootElement;
     this.toolbarElement = toolbarElement;
     this.contentEditableElement = contentEditableElement;
+
+    this.setupToolbarSticky();
+};
+
+WebHackerEditor.prototype.setupToolbarSticky = function () {
+    const toolbar = this.toolbarElement;
+    const editor = this.editorRootElement;
+    
+    if (!toolbar || !editor) return;
+
+    editor.style.setProperty('--toolbar-height', toolbar.offsetHeight + 'px');
+
+    const handleScroll = () => {
+        if (editor.getBoundingClientRect().top < 0) {
+            toolbar.classList.add('webhacker-toolbar--fixed');
+        } else {
+            toolbar.classList.remove('webhacker-toolbar--fixed');
+        }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    this.toolbarScrollHandler = handleScroll;
+    handleScroll();
 };
 
 WebHackerEditor.prototype.toggleMenu = function (dropdownMenuElement) {
     this.closeAllMenus(dropdownMenuElement);
     dropdownMenuElement.classList.toggle("webhacker-menu--hidden");
+
+    dropdownMenuElement.style.left = 'unset';
+    dropdownMenuElement.style.right = 'unset';
+
+    if (!dropdownMenuElement.classList.contains("webhacker-menu--hidden")) {
+        setTimeout(() => {            
+            if (dropdownMenuElement.getBoundingClientRect().right > this.editorRootElement.getBoundingClientRect().right) {
+                dropdownMenuElement.style.left = 'unset';
+                dropdownMenuElement.style.right = '0';
+            }
+        }, 0);
+    }
+    
     const onOutsideMouseDown = event => {
         if (!dropdownMenuElement.contains(event.target)) {
             this.closeAllMenus();
@@ -219,4 +255,28 @@ WebHackerEditor.prototype.restoreSelectionRange = function (savedRange) {
 
 WebHackerEditor.prototype.setTheme = function (themeOptions) {
     applyThemeVariables(this.editorRootElement, themeOptions || null);
+};
+
+WebHackerEditor.prototype.createMenuAction = function (actionCallback) {
+    return (event) => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        const scrollY = window.scrollY;
+        
+        this.closeAllMenus();
+        this.contentEditableElement.focus();
+        this.restoreSelectionRange(this.currentSavedSelectionRange);
+        
+        if (actionCallback) {
+            actionCallback();
+        }
+        
+        this.emitChange();
+        this.syncToggleStates();
+        
+        window.scrollTo(0, scrollY);
+    };
 };

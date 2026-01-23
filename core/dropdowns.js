@@ -44,14 +44,9 @@ WebHackerEditor.prototype.createTableDropdown = function () {
                 "aria-label": `${rowIndex}×${colIndex}`
             });
             cellElement.addEventListener("mouseenter", () => updateHighlight(rowIndex, colIndex));
-            cellElement.addEventListener("click", () => {
-                this.closeAllMenus();
-                this.contentEditableElement.focus();
-                this.restoreSelectionRange(this.currentSavedSelectionRange);
+            cellElement.addEventListener("click", this.createMenuAction(() => {
                 this.insertMinimalTable(rowIndex, colIndex);
-                this.emitChange();
-                this.syncToggleStates();
-            });
+            }));
             tablePickerGridElement.appendChild(cellElement);
         }
     }
@@ -77,14 +72,9 @@ WebHackerEditor.prototype.createHeadingDropdown = function () {
         const menuItemElement = createElement("div", "webhacker-menu__item");
         menuItemElement.textContent = label;
         menuItemElement.addEventListener("mousedown", event => event.preventDefault());
-        menuItemElement.addEventListener("click", () => {
-            this.closeAllMenus();
-            this.contentEditableElement.focus();
-            this.restoreSelectionRange(this.currentSavedSelectionRange);
+        menuItemElement.addEventListener("click", this.createMenuAction(() => {
             executeRichCommand("formatBlock", tag.toUpperCase());
-            this.emitChange();
-            this.syncToggleStates();
-        });
+        }));
         dropdownMenuElement.appendChild(menuItemElement);
     });
     return dropdownWrapperElement;
@@ -116,7 +106,9 @@ WebHackerEditor.prototype.createColorDropdown = function () {
             title: hexColor
         });
         swatchButtonElement.style.background = hexColor;
-        swatchButtonElement.addEventListener("click", () => applySelectedColorAndClose(hexColor));
+        swatchButtonElement.addEventListener("click", this.createMenuAction(() => {
+            executeRichCommand("foreColor", hexColor);
+        }));
         swatchesContainerElement.appendChild(swatchButtonElement);
     });
 
@@ -173,14 +165,11 @@ WebHackerEditor.prototype.createLinkDropdown = function () {
               : "";
     });
 
-    linkConfirmButtonElement.addEventListener("click", () => {
+    linkConfirmButtonElement.addEventListener("click", this.createMenuAction(() => {
         let hrefValue = linkUrlInputElement.value.trim();
         const labelValue = linkTextInputElement.value.trim();
         if (!hrefValue) return;
         hrefValue = ensureSafeUrl(hrefValue);
-        this.closeAllMenus();
-        this.contentEditableElement.focus();
-        this.restoreSelectionRange(this.currentSavedSelectionRange);
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) return;
         const visibleText = selection.isCollapsed ? hrefValue : selection.toString();
@@ -188,18 +177,12 @@ WebHackerEditor.prototype.createLinkDropdown = function () {
             labelValue || visibleText
         )}</a>`;
         executeRichCommand("insertHTML", linkHtml);
-        this.emitChange();
-        this.syncToggleStates();
-    });
-    linkRemoveButtonElement.addEventListener("click", () => {
-        this.closeAllMenus();
-        this.contentEditableElement.focus();
-        this.restoreSelectionRange(this.currentSavedSelectionRange);
+    }));
+    linkRemoveButtonElement.addEventListener("click", this.createMenuAction(() => {
         executeRichCommand("unlink");
-        this.emitChange();
-        this.syncToggleStates();
         linkUrlInputElement.value = "";
         linkTextInputElement.value = "";
-    });
+    }));
+    
     return dropdownWrapperElement;
 };
