@@ -21,3 +21,5 @@ ok: "OK"
 paragraph: "Paragraph"
 linkPlaceholder: "https://example.com"
 linkTextPlaceholder: "Link text (optional)"
+clearColor: "Clear color"
+

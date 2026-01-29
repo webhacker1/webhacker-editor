@@ -90,15 +90,6 @@ WebHackerEditor.prototype.createColorDropdown = function () {
     const colorContainerElement = createElement("div", "webhacker-color");
     const swatchesContainerElement = createElement("div", "webhacker-color__swatches");
 
-    const applySelectedColorAndClose = hexColor => {
-        this.closeAllMenus();
-        this.contentEditableElement.focus();
-        this.restoreSelectionRange(this.currentSavedSelectionRange);
-        executeRichCommand("foreColor", hexColor);
-        this.emitChange();
-        this.syncToggleStates();
-    };
-
     DEFAULT_TEXT_PRESET_COLORS.forEach(hexColor => {
         const swatchButtonElement = createElement("button", "webhacker-swatch", {
             type: "button",
@@ -112,7 +103,22 @@ WebHackerEditor.prototype.createColorDropdown = function () {
         swatchesContainerElement.appendChild(swatchButtonElement);
     });
 
-    colorContainerElement.append(swatchesContainerElement);
+    const clearColorButtonElement = createElement(
+        "button",
+        "webhacker-button webhacker-button--ghost",
+        {
+            type: "button",
+            "data-tooltip": t.clearColor
+        }
+    );
+    clearColorButtonElement.innerHTML = `<i class="fa-solid fa-eraser"></i>`;
+    clearColorButtonElement.addEventListener("click", this.createMenuAction(() => {
+        const editorElement = this.editorRootElement;
+        const defaultColor = getComputedStyle(editorElement).getPropertyValue('--text-color').trim();
+        executeRichCommand("foreColor", defaultColor);
+    }));
+
+    colorContainerElement.append(swatchesContainerElement, clearColorButtonElement);
     dropdownMenuElement.appendChild(colorContainerElement);
     return dropdownWrapperElement;
 };
@@ -183,6 +189,6 @@ WebHackerEditor.prototype.createLinkDropdown = function () {
         linkUrlInputElement.value = "";
         linkTextInputElement.value = "";
     }));
-    
+
     return dropdownWrapperElement;
 };

@@ -234,8 +234,11 @@
 }
 
 .webhacker-color {
-    display: grid;
+    display: flex;
     gap: 10px;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
 }
 .webhacker-color__swatches {
     display: grid;
