@@ -1,6 +1,6 @@
 {
     "name": "editorwh",
-    "version": "0.0.10-beta",
+    "version": "0.0.10b-beta",
     "type": "module",
     "main": "index.js",
     "scripts": {
