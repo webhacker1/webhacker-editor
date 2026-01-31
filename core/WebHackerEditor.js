@@ -130,6 +130,17 @@ WebHackerEditor.prototype.renderEditorInterface = function () {
         this.createTableDropdown()
     );
 
+    const resetStyleGroupElement = createElement("div", "webhacker-toolbar__group");
+    resetStyleGroupElement.append(
+        this.createToolbarButton(
+            "fa-solid fa-eraser",
+            t.reset_styles,
+            () => executeRichCommand("removeFormat"),
+            true,
+            "reset styles"
+        )
+    );
+
     toolbarElement.append(
         historyGroupElement,
         this.createSeparator(),
@@ -139,7 +150,9 @@ WebHackerEditor.prototype.renderEditorInterface = function () {
         this.createSeparator(),
         alignGroupElement,
         this.createSeparator(),
-        listsGroupElement
+        listsGroupElement,
+        this.createSeparator(),
+        resetStyleGroupElement
     );
 
     const betaBadge = createElement("span", "webhacker-badge--beta", {
