@@ -59,6 +59,56 @@ WebHackerEditor.prototype.bindEditorEvents = function () {
     });
 
     this.contentEditableElement.addEventListener("keydown", event => {
+        if (event.key === 'Tab') {
+            const selection = window.getSelection();
+            if (!selection || selection.rangeCount === 0) return;
+
+            const range = selection.getRangeAt(0);
+            const startContainer = range.startContainer;
+            const tableCell = startContainer.closest
+                ? startContainer.closest('td,th')
+                : (startContainer.nodeType === 3
+                    ? startContainer.parentNode.closest('td,th')
+                    : null);
+            
+            if (tableCell) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                const table = tableCell.closest('table');
+                const allCells = Array.from(table.querySelectorAll('td,th'));
+                const currentIndex = allCells.indexOf(tableCell);
+
+                if (currentIndex === -1) return;
+
+                let nextIndex;
+                if (event.shiftKey) {
+                    nextIndex = currentIndex > 0 ? currentIndex - 1 : allCells.length - 1;
+                } else {
+                    nextIndex = currentIndex < allCells.length - 1 ? currentIndex + 1 : 0;
+                }
+                
+                const nextCell = allCells[nextIndex];
+                const newRange = document.createRange();
+
+                if (!nextCell.textContent.trim() && nextCell.childNodes.length === 0) {
+                    nextCell.textContent = '\u200B';
+                }
+                if (nextCell.firstChild) {
+                    newRange.setStart(nextCell.firstChild, 0);
+                    newRange.setEnd(nextCell.firstChild, 0);
+                } else {
+                    newRange.selectNodeContents(nextCell);
+                    newRange.collapse(true);
+                }
+                
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+
+                return false;
+            }
+        }
+
         const pressedKey = event.key.toLowerCase();
         const hasCommandModifier = event.ctrlKey || event.metaKey;
 
