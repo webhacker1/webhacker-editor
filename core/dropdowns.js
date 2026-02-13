@@ -8,118 +8,198 @@ import en from "../translations/en.yml";
 
 const translations = { ru, en };
 
-WebHackerEditor.prototype.createTableDropdown = function () {
-    const lang = this.editorOptions.language || "ru";
-    const t = translations[lang];
-    const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown(
-        "fa-solid fa-table",
-        t.table
-    );
-    const tablePickerWrapperElement = createElement("div", "webhacker-tablepick");
-    const tablePickerLabelElement = createElement("div", "webhacker-tablepick__label");
-    tablePickerLabelElement.textContent = "0×0";
-    const tablePickerGridElement = createElement("div", "webhacker-tablepick__grid");
-
-    const updateHighlight = (rowsSelected, colsSelected) => {
-        tablePickerLabelElement.textContent = `${rowsSelected}×${colsSelected}`;
-        tablePickerGridElement
-            .querySelectorAll(".webhacker-tablepick__cell")
-            .forEach(cellElement => {
-                const rowIndex = parseInt(cellElement.getAttribute("data-row"), 10);
-                const colIndex = parseInt(cellElement.getAttribute("data-col"), 10);
-                if (rowIndex <= rowsSelected && colIndex <= colsSelected) {
-                    cellElement.classList.add("is-selected");
-                } else {
-                    cellElement.classList.remove("is-selected");
-                }
-            });
-    };
-
-    for (let rowIndex = 1; rowIndex <= 10; rowIndex += 1) {
-        for (let colIndex = 1; colIndex <= 10; colIndex += 1) {
-            const cellElement = createElement("button", "webhacker-tablepick__cell", {
-                type: "button",
-                "data-row": String(rowIndex),
-                "data-col": String(colIndex),
-                "aria-label": `${rowIndex}×${colIndex}`
-            });
-            cellElement.addEventListener("mouseenter", () => updateHighlight(rowIndex, colIndex));
-            cellElement.addEventListener("click", this.createMenuAction(() => {
-                this.insertMinimalTable(rowIndex, colIndex);
-            }));
-            tablePickerGridElement.appendChild(cellElement);
+WebHackerEditor.prototype.setupMenuKeyboardNav = function(menuElement, options = {}) {
+    const { items, onSelect, onClose, focusFirst = true, grid = null } = options;
+    if (!menuElement || !items?.length) return;
+    
+    let idx = 0;
+    const isGrid = !!grid;
+    const cols = grid?.cols || 1;
+    
+    const focus = (index) => {
+        index = (index + items.length) % items.length;
+        idx = index;
+        items.forEach((item, i) => {
+            item.tabIndex = i === index ? 0 : -1;
+            item.classList.toggle('is-focused', i === index);
+        });
+        items[idx]?.focus();
+        if (isGrid && grid?.onHover) {
+            const { row, col } = items[idx].dataset;
+            grid.onHover(+row, +col);
         }
-    }
+    };
+    
+    const close = () => {
+        menuElement.classList.add('webhacker-menu--hidden');
+        items.forEach(item => { item.tabIndex = -1; item.classList.remove('is-focused'); });
+        onClose?.();
+        menuElement.closest('.webhacker-dropdown')?.querySelector('.webhacker-button')?.focus();
+        menuElement.closest('.webhacker-dropdown')?.dispatchEvent(new Event('dropdownClosed'));
+    };
+    
+    items.forEach((item, i) => {
+        item.addEventListener('keydown', (e) => {
+            const key = e.key;
+            if (key.startsWith('Arrow') || key === 'Tab') e.preventDefault();
+            
+            if (isGrid) {
+                if (key === 'ArrowRight') focus(idx + 1);
+                if (key === 'ArrowLeft') focus(idx - 1);
+                if (key === 'ArrowDown') focus(idx + cols);
+                if (key === 'ArrowUp') focus(idx - cols);
+                if (key === 'Tab') focus(idx + (e.shiftKey ? -1 : 1));
+            } else {
+                if (key === 'ArrowRight' || key === 'ArrowDown') focus(idx + 1);
+                if (key === 'ArrowLeft' || key === 'ArrowUp') focus(idx - 1);
+                if (key === 'Tab') focus(idx + (e.shiftKey ? -1 : 1));
+            }
+            
+            if (key === 'Enter' || key === ' ') {
+                e.preventDefault();
+                onSelect?.(items[idx]);
+                close();
+            }
+            if (key === 'Escape') close();
+        });
+        
+        item.addEventListener('mouseenter', () => focus(i));
+        item.addEventListener('click', () => {
+            focus(i);
+            onSelect?.(item);
+            close();
+        });
+    });
+    
+    const trigger = menuElement.closest('.webhacker-dropdown')?.querySelector('.webhacker-button');
+    trigger?.addEventListener('click', () => {
+        if (focusFirst) setTimeout(() => {
+            if (!menuElement.classList.contains('webhacker-menu--hidden')) focus(0);
+        }, 50);
+    });
+    
+    menuElement.closest('.webhacker-dropdown')?.addEventListener('dropdownClosed', () => {
+        idx = 0;
+        items.forEach(item => { item.tabIndex = -1; item.classList.remove('is-focused'); });
+        onClose?.();
+    });
+    
+    return { focus, close };
+};
 
-    tablePickerWrapperElement.append(tablePickerLabelElement, tablePickerGridElement);
-    dropdownMenuElement.appendChild(tablePickerWrapperElement);
+WebHackerEditor.prototype.createTableDropdown = function () {
+    const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown("fa-solid fa-table", translations[this.editorOptions.language || "ru"].table);
+    const picker = createElement("div", "webhacker-tablepick");
+    const label = createElement("div", "webhacker-tablepick__label");
+    label.textContent = "0×0";
+    const grid = createElement("div", "webhacker-tablepick__grid");
+    
+    let rows = 0, cols = 0;
+    const cells = [];
+    
+    for (let r = 1; r <= 10; r++) for (let c = 1; c <= 10; c++) {
+        const cell = createElement("button", "webhacker-tablepick__cell", {
+            type: "button", "data-row": r, "data-col": c, "aria-label": `${r}×${c}`, tabindex: "-1"
+        });
+        cell.addEventListener("click", this.createMenuAction(() => this.insertMinimalTable(rows, cols)));
+        grid.appendChild(cell);
+        cells.push(cell);
+    }
+    
+    picker.append(label, grid);
+    dropdownMenuElement.appendChild(picker);
+    
+    this.setupMenuKeyboardNav(dropdownMenuElement, {
+        items: cells,
+        grid: { cols: 10, onHover: (r, c) => {
+            rows = r; cols = c;
+            label.textContent = `${r}×${c}`;
+            cells.forEach(cell => {
+                const { row, col } = cell.dataset;
+                cell.classList.toggle("is-selected", +row <= r && +col <= c);
+            });
+        }},
+        onSelect: () => this.insertMinimalTable(rows, cols),
+        onClose: () => {
+            rows = cols = 0;
+            label.textContent = "0×0";
+            cells.forEach(cell => cell.classList.remove('is-selected'));
+        }
+    });
+    
     return dropdownWrapperElement;
 };
 
 WebHackerEditor.prototype.createHeadingDropdown = function () {
-    const lang = this.editorOptions.language || "ru";
-    const t = translations[lang];
-    const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown(
-        "fa-solid fa-heading",
-        t.headings
-    );
-    [
+    const t = translations[this.editorOptions.language || "ru"];
+    const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown("fa-solid fa-heading", t.headings);
+    
+    const headings = [
         { label: t.paragraph, tag: "p" },
         { label: "H1", tag: "h1" },
         { label: "H2", tag: "h2" },
         { label: "H3", tag: "h3" }
-    ].forEach(({ label, tag }) => {
-        const menuItemElement = createElement("div", "webhacker-menu__item");
-        menuItemElement.textContent = label;
-        menuItemElement.addEventListener("mousedown", event => event.preventDefault());
-        menuItemElement.addEventListener("click", this.createMenuAction(() => {
-            executeRichCommand("formatBlock", tag.toUpperCase());
-        }));
-        dropdownMenuElement.appendChild(menuItemElement);
+    ];
+    
+    const items = headings.map(({ label, tag }) => {
+        const item = createElement("div", "webhacker-menu__item");
+        item.textContent = label;
+        item.tabIndex = "-1";
+        item.addEventListener("mousedown", e => e.preventDefault());
+        item.addEventListener("click", this.createMenuAction(() => executeRichCommand("formatBlock", tag.toUpperCase())));
+        dropdownMenuElement.appendChild(item);
+        return item;
     });
+    
+    this.setupMenuKeyboardNav(dropdownMenuElement, {
+        items,
+        onSelect: (item) => executeRichCommand("formatBlock", headings[items.indexOf(item)].tag.toUpperCase())
+    });
+    
     return dropdownWrapperElement;
 };
 
 WebHackerEditor.prototype.createColorDropdown = function () {
-    const lang = this.editorOptions.language || "ru";
-    const t = translations[lang];
-    const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown(
-        "fa-solid fa-palette",
-        t.color
-    );
-    const colorContainerElement = createElement("div", "webhacker-color");
-    const swatchesContainerElement = createElement("div", "webhacker-color__swatches");
-
-    DEFAULT_TEXT_PRESET_COLORS.forEach(hexColor => {
-        const swatchButtonElement = createElement("button", "webhacker-swatch", {
-            type: "button",
-            "data-color": hexColor,
-            title: hexColor
+    const t = translations[this.editorOptions.language || "ru"];
+    const { dropdownWrapperElement, dropdownMenuElement } = this.createDropdown("fa-solid fa-palette", t.color);
+    
+    const container = createElement("div", "webhacker-color");
+    const swatchesContainer = createElement("div", "webhacker-color__swatches");
+    
+    const swatches = DEFAULT_TEXT_PRESET_COLORS.map(hex => {
+        const swatch = createElement("button", "webhacker-swatch", {
+            type: "button", "data-color": hex, title: hex, tabindex: "-1"
         });
-        swatchButtonElement.style.background = hexColor;
-        swatchButtonElement.addEventListener("click", this.createMenuAction(() => {
-            executeRichCommand("foreColor", hexColor);
-        }));
-        swatchesContainerElement.appendChild(swatchButtonElement);
+        swatch.style.background = hex;
+        swatch.addEventListener("click", this.createMenuAction(() => executeRichCommand("foreColor", hex)));
+        swatchesContainer.appendChild(swatch);
+        return swatch;
     });
-
-    const clearColorButtonElement = createElement(
-        "button",
-        "webhacker-button webhacker-button--ghost",
-        {
-            type: "button",
-            "data-tooltip": t.clearColor
-        }
-    );
-    clearColorButtonElement.innerHTML = `<i class="fa-solid fa-eraser"></i>`;
-    clearColorButtonElement.addEventListener("click", this.createMenuAction(() => {
-        const editorElement = this.editorRootElement;
-        const defaultColor = getComputedStyle(editorElement).getPropertyValue('--text-color').trim();
-        executeRichCommand("foreColor", defaultColor);
+    
+    const clearBtn = createElement("button", "webhacker-button webhacker-button--ghost", {
+        type: "button", "data-tooltip": t.clearColor, tabindex: "-1"
+    });
+    clearBtn.innerHTML = `<i class="fa-solid fa-eraser"></i>`;
+    clearBtn.addEventListener("click", this.createMenuAction(() => {
+        executeRichCommand("foreColor", getComputedStyle(this.editorRootElement).getPropertyValue('--text-color').trim());
     }));
-
-    colorContainerElement.append(swatchesContainerElement, clearColorButtonElement);
-    dropdownMenuElement.appendChild(colorContainerElement);
+    
+    container.append(swatchesContainer, clearBtn);
+    dropdownMenuElement.appendChild(container);
+    
+    const allItems = [...swatches, clearBtn];
+    
+    this.setupMenuKeyboardNav(dropdownMenuElement, {
+        items: allItems,
+        onSelect: (item) => {
+            if (item === clearBtn) {
+                executeRichCommand("foreColor", getComputedStyle(this.editorRootElement).getPropertyValue('--text-color').trim());
+            } else {
+                executeRichCommand("foreColor", item.dataset.color);
+            }
+        }
+    });
+    
     return dropdownWrapperElement;
 };
 

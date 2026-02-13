@@ -392,3 +392,38 @@
     background: var(--secondary-color);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
+/* Единый стиль для фокуса во всех меню */
+.webhacker-menu__item:focus,
+.webhacker-swatch:focus,
+.webhacker-tablepick__cell:focus,
+.webhacker-button--ghost:focus {
+    outline: none;
+}
+
+.webhacker-menu__item.is-focused,
+.webhacker-swatch.is-focused,
+.webhacker-tablepick__cell.is-focused,
+.webhacker-button--ghost.is-focused {
+    outline: 2px solid var(--primary-color, #007bff);
+    outline-offset: 2px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Специфичные стили для разных типов элементов */
+.webhacker-menu__item.is-focused {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.webhacker-swatch.is-focused {
+    transform: scale(1.1);
+}
+
+.webhacker-tablepick__cell.is-focused.is-selected {
+    background-color: var(--primary-color, #007bff);
+}
+
+.webhacker-button--ghost.is-focused {
+    background-color: rgba(183, 0, 255, 0.1);
+}
