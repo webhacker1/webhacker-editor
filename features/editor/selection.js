@@ -13,3 +13,13 @@ export function placeCaretInElement(element) {
     selection.removeAllRanges();
     selection.addRange(selectionRange);
 }
+
+export function placeCaretAfterElement(element) {
+    if (!element || !element.parentNode) return;
+    const range = document.createRange();
+    range.setStartAfter(element);
+    range.collapse(true);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+}

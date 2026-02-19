@@ -104,3 +104,25 @@
     letter-spacing: 0.5px;
 }
 
+.webhacker-toolbar--floating {
+    position: fixed;
+    top: 10px;
+    right: 12px;
+    left: auto;
+    width: auto;
+    max-width: calc(100vw - 24px);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.14);
+    z-index: 60;
+    flex-wrap: nowrap;
+}
+
+@media (max-width: 900px) {
+    .webhacker-toolbar--floating {
+        right: 8px;
+        left: 8px;
+        width: auto;
+        flex-wrap: wrap;
+    }
+}

@@ -1,5 +1,6 @@
 import { executeRichCommand } from "../../../core/commands.js";
 import { getSelectionAnchorElement } from "./utils.js";
+import { placeCaretAfterElement } from "../selection.js";
 
 export function bindKeyboardEvents(editor) {
     editor.contentEditableElement.addEventListener("keydown", event => {
@@ -8,6 +9,11 @@ export function bindKeyboardEvents(editor) {
         const selection = window.getSelection();
         const anchorNode = getSelectionAnchorElement(selection);
         const activeCodeElement = anchorNode && anchorNode.closest ? anchorNode.closest("pre code") : null;
+        const nearestCodeElement = anchorNode && anchorNode.closest ? anchorNode.closest("code") : null;
+        const inlineCodeElement =
+            nearestCodeElement && nearestCodeElement.closest && !nearestCodeElement.closest("pre")
+                ? nearestCodeElement
+                : null;
 
         if (event.key === "Tab" && activeCodeElement) {
             event.preventDefault();
@@ -20,6 +26,15 @@ export function bindKeyboardEvents(editor) {
         if (event.key === "Enter" && activeCodeElement && hasCommandModifier && !event.shiftKey) {
             event.preventDefault();
             editor.exitCodeBlockToNextLine(activeCodeElement);
+            return;
+        }
+
+        if (event.key === "Enter" && inlineCodeElement) {
+            event.preventDefault();
+            placeCaretAfterElement(inlineCodeElement);
+            executeRichCommand("insertHTML", "<br>");
+            editor.emitChange();
+            editor.syncToggleStates();
             return;
         }
 
@@ -77,4 +92,3 @@ export function bindKeyboardEvents(editor) {
         }
     });
 }
-

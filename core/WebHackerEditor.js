@@ -23,6 +23,7 @@ export default function WebHackerEditor(rootSelectorOrElement, editorOptions = {
     this.renderEditorInterface();
     applyThemeVariables(this.editorRootElement, this.editorOptions.theme);
     this.bindEditorEvents();
+    this.bindFloatingToolbar();
 }
 
 WebHackerEditor.prototype.getHTML = function () {
@@ -135,4 +136,25 @@ WebHackerEditor.prototype.restoreSelectionRange = function (savedRange) {
 
 WebHackerEditor.prototype.setTheme = function (themeOptions) {
     applyThemeVariables(this.editorRootElement, themeOptions || null);
+};
+
+WebHackerEditor.prototype.bindFloatingToolbar = function () {
+    const updateFloatingState = () => {
+        const editorRect = this.editorRootElement.getBoundingClientRect();
+        const shouldFloat = editorRect.top < 0 && editorRect.bottom > 80;
+        this.toolbarElement.classList.toggle("webhacker-toolbar--floating", shouldFloat);
+    };
+
+    let rafId = null;
+    const scheduleUpdate = () => {
+        if (rafId !== null) return;
+        rafId = requestAnimationFrame(() => {
+            rafId = null;
+            updateFloatingState();
+        });
+    };
+
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    scheduleUpdate();
 };

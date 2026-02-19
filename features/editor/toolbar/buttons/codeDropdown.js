@@ -23,6 +23,10 @@ function replacePreWithPlainText(preElement, plainTextValue) {
     executeRichCommand("insertHTML", htmlValue);
 }
 
+function normalizeInlineCodeText(value) {
+    return String(value).replace(/\u200B/g, "").replace(/\r?\n+/g, " ");
+}
+
 function toggleInlineCode(editor) {
     const anchorElement = getSelectionAnchorElement();
     const nearestCodeElement = anchorElement && anchorElement.closest ? anchorElement.closest("code") : null;
@@ -41,9 +45,11 @@ function toggleInlineCode(editor) {
     const codeElement = document.createElement("code");
 
     if (!selection.isCollapsed) {
-        const fragment = range.extractContents();
-        codeElement.appendChild(fragment);
+        const selectedText = normalizeInlineCodeText(selection.toString());
+        range.deleteContents();
+        codeElement.textContent = selectedText || "\u200B";
         range.insertNode(codeElement);
+        placeCaretInElement(codeElement);
     } else {
         range.insertNode(codeElement);
         if (!codeElement.firstChild) codeElement.appendChild(document.createTextNode("\u200B"));
