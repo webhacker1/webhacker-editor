@@ -1,0 +1,106 @@
+.webhacker-toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    background: var(--background-color);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    color: var(--text-color);
+    z-index: 5;
+    position: sticky;
+    top: 0;
+
+    &__group {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    &__separator {
+        width: 1px;
+        height: 24px;
+        background: var(--border-color);
+    }
+}
+
+.webhacker-button {
+    appearance: none;
+    border: 1px solid var(--border-color);
+    background: var(--background-color);
+    color: var(--text-color);
+    padding: 6px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--background-color);
+    }
+
+    &[aria-pressed="true"] {
+        outline: 2px solid var(--accent-color);
+        outline-offset: 1px;
+    }
+
+    &--primary,
+    &--primary:hover {
+        background: var(--accent-color);
+        border-color: transparent;
+        color: #fff;
+    }
+
+    &--ghost {
+        background: transparent;
+    }
+
+    &[disabled],
+    &[aria-disabled="true"] {
+        cursor: not-allowed;
+        position: relative;
+
+        > i {
+            opacity: 0.5;
+        }
+
+        &:hover {
+            background: var(--background-color);
+        }
+    }
+
+    &[aria-disabled="true"]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e2251;
+        color: #fff;
+        padding: 4px 6px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+        z-index: 30;
+    }
+
+    &[aria-disabled="true"]:hover::after {
+        opacity: 1;
+    }
+}
+
+.webhacker-badge--beta {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    background: #fea530;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+

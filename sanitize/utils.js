@@ -12,11 +12,28 @@ export function escapeHtml(stringValue) {
     );
 }
 
+function normalizeRawUrl(rawUrl) {
+    return String(rawUrl ?? "")
+        .trim()
+        .replace(/[\u0000-\u001F\u007F\s]+/g, "");
+}
+
+export function sanitizeHref(rawUrl) {
+    const value = normalizeRawUrl(rawUrl);
+    if (!value) return "about:blank";
+
+    if (/^https?:\/\//i.test(value) || /^mailto:/i.test(value) || /^tel:/i.test(value)) {
+        return value;
+    }
+
+    if (/^\/\//.test(value)) return `https:${value}`;
+    if (/^\//.test(value)) return value;
+    if (/^[a-z][\w+.-]*:/i.test(value)) return "about:blank";
+    return `https://${value}`;
+}
+
 export function ensureSafeUrl(rawUrl) {
-    const value = String(rawUrl || "").trim();
-    if (/^(https?:|mailto:|tel:|data:image\/)/i.test(value)) return value;
-    const stripped = value.replace(/^[a-zA-Z][\w+.-]*:/, "");
-    return stripped ? "https://" + stripped : "https://";
+    return sanitizeHref(rawUrl);
 }
 
 export function normalizeCssColorToHex(inputValue) {

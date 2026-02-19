@@ -1,4 +1,4 @@
-import { ensureSafeUrl, normalizeCssColorToHex } from "./utils.js";
+import { sanitizeHref, normalizeCssColorToHex } from "./utils.js";
 import { sanitizeStyleAttributeForElement } from "./styles.js";
 import { TABLE_ALLOWED_CLASS_LIST } from "../constants/allowedTags.js";
 
@@ -23,10 +23,9 @@ export function sanitizeElementAttributes(element, options = {}) {
 
     switch (tagName) {
         case "a": {
-            const hrefValue = ensureSafeUrl(element.getAttribute("href") || "");
-            element.setAttribute("href", hrefValue);
+            element.setAttribute("href", sanitizeHref(element.getAttribute("href")));
             element.setAttribute("target", "_blank");
-            element.setAttribute("rel", "noopener noreferrer");
+            element.setAttribute("rel", "noopener noreferrer nofollow ugc");
             [...element.attributes].forEach(attribute => {
                 if (!["href", "target", "rel", "style"].includes(attribute.name))
                     element.removeAttribute(attribute.name);
@@ -34,28 +33,39 @@ export function sanitizeElementAttributes(element, options = {}) {
             sanitizeStyleAttributeForElement(element, options);
             break;
         }
-        case "img": {
-            const srcValue = ensureSafeUrl(element.getAttribute("src") || "");
-            const isDataImage = /^data:image\//i.test(srcValue);
-            const isHttpImage =
-                /^https?:\/\//i.test(srcValue) && /\.(png|jpe?g|gif|webp|svg)$/i.test(srcValue);
-            if (!(isDataImage || isHttpImage)) {
-                element.remove();
-                break;
-            }
-            element.setAttribute("src", srcValue);
-            const altValue = element.getAttribute("alt") || "";
-            element.setAttribute("alt", altValue);
+        case "span": {
+            sanitizeStyleAttributeForElement(element, options);
+            const filteredClassList = (element.getAttribute("class") ?? "")
+                .split(/\s+/)
+                .filter(
+                    className =>
+                        /^hljs(-[a-z0-9_-]+)?$/i.test(className) || /^[a-z0-9-]+_$/i.test(className)
+                );
+            if (filteredClassList.length)
+                element.setAttribute("class", filteredClassList.join(" "));
+            else element.removeAttribute("class");
             [...element.attributes].forEach(attribute => {
-                if (!["src", "alt"].includes(attribute.name))
+                if (!["style", "class"].includes(attribute.name))
                     element.removeAttribute(attribute.name);
             });
             break;
         }
-        case "span": {
-            sanitizeStyleAttributeForElement(element, options);
+        case "pre":
+        case "code": {
+            const filteredClassList = (element.getAttribute("class") ?? "")
+                .split(/\s+/)
+                .filter(
+                    className =>
+                        /^language-[a-z0-9+-]+$/i.test(className) ||
+                        /^hljs(-[a-z0-9_-]+)?$/i.test(className)
+                );
+
+            if (filteredClassList.length)
+                element.setAttribute("class", filteredClassList.join(" "));
+            else element.removeAttribute("class");
+
             [...element.attributes].forEach(attribute => {
-                if (!["style"].includes(attribute.name)) element.removeAttribute(attribute.name);
+                if (!["class"].includes(attribute.name)) element.removeAttribute(attribute.name);
             });
             break;
         }
@@ -72,7 +82,7 @@ export function sanitizeElementAttributes(element, options = {}) {
             break;
         }
         case "table": {
-            const filteredClassList = (element.getAttribute("class") || "")
+            const filteredClassList = (element.getAttribute("class") ?? "")
                 .split(/\s+/)
                 .filter(className => TABLE_ALLOWED_CLASS_LIST.includes(className));
             if (filteredClassList.length)
@@ -85,7 +95,7 @@ export function sanitizeElementAttributes(element, options = {}) {
         }
         case "td":
         case "th": {
-            const filteredCellClassList = (element.getAttribute("class") || "")
+            const filteredCellClassList = (element.getAttribute("class") ?? "")
                 .split(/\s+/)
                 .filter(className => className === "is-numeric");
             if (filteredCellClassList.length)

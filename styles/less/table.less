@@ -1,0 +1,72 @@
+.webhacker-tablepick {
+    display: grid;
+    gap: 8px;
+
+    &__label {
+        font-size: 12px;
+        color: var(--muted-color);
+        text-align: right;
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(10, 18px);
+        gap: 6px;
+    }
+
+    &__cell {
+        width: 18px;
+        height: 18px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--background-color);
+        padding: 0;
+        cursor: pointer;
+
+        &.is-selected {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+    }
+}
+
+.wh-table {
+    display: inline-table;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--background-color);
+    color: var(--text-color);
+    border: 2px solid var(--table-line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px auto;
+    max-width: 100%;
+
+    th,
+    td {
+        padding: 10px 14px;
+        vertical-align: top;
+        border-right: 1px solid var(--table-line);
+        border-bottom: 1px solid var(--table-line);
+        word-break: break-word;
+    }
+
+    thead th {
+        font-weight: 600;
+        border-bottom: 2px solid var(--table-line);
+    }
+
+    th:last-child,
+    td:last-child {
+        border-right: 0;
+    }
+
+    tr:last-child td {
+        border-bottom: 0;
+    }
+
+    + .wh-table {
+        margin-top: 20px;
+    }
+}
+

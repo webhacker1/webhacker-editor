@@ -1,0 +1,30 @@
+.webhacker-dropdown {
+    position: relative;
+}
+
+.webhacker-menu {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 8px;
+    z-index: 20;
+    color: var(--text-color);
+
+    &--hidden {
+        display: none;
+    }
+
+    &__item {
+        padding: 8px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+
+        &:hover {
+            background: var(--background-color);
+        }
+    }
+}
+

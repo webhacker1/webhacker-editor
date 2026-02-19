@@ -1,4 +1,4 @@
-import WebHackerEditor from "../core/WebHackerEditor.js";
+import WebHackerEditor from "../../core/WebHackerEditor.js";
 
 WebHackerEditor.prototype.insertMinimalTable = function (rowCount = 2, columnCount = 2) {
     const tableElement = document.createElement("table");

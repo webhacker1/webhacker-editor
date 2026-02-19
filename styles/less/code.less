@@ -1,0 +1,277 @@
+.webhacker-content,
+.rich-content {
+    code {
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 0.92em;
+        background: var(--code-inline-bg);
+        border: 1px solid var(--code-inline-border);
+        color: var(--code-inline-text);
+        border-radius: 6px;
+        padding: 0.12em 0.38em;
+    }
+
+    pre {
+        margin: 1em 0;
+        padding: 36px 14px 38px;
+        background: var(--code-block-bg);
+        color: var(--code-block-text);
+        border: 1px solid var(--code-block-border);
+        border-radius: 10px;
+        overflow: visible;
+        position: relative;
+
+        code {
+            background: transparent;
+            border: 0;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+            display: block;
+            line-height: 1.5;
+            white-space: pre;
+            overflow-x: auto;
+            overflow-y: hidden;
+            overflow-wrap: normal;
+
+            &.hljs {
+                .hljs-keyword,
+                .hljs-selector-tag,
+                .hljs-meta .hljs-keyword {
+                    color: var(--code-token-keyword);
+                }
+
+                .hljs-string,
+                .hljs-template-string,
+                .hljs-regexp {
+                    color: var(--code-token-string);
+                }
+
+                .hljs-number,
+                .hljs-literal {
+                    color: var(--code-token-number);
+                }
+
+                .hljs-title,
+                .hljs-function .hljs-title {
+                    color: var(--code-token-title);
+                }
+
+                .hljs-comment,
+                .hljs-quote {
+                    color: var(--code-token-comment);
+                }
+
+                .hljs-attr,
+                .hljs-attribute,
+                .hljs-name {
+                    color: var(--code-token-attribute);
+                }
+
+                .hljs-built_in,
+                .hljs-type,
+                .hljs-variable.language_ {
+                    color: var(--code-token-literal);
+                }
+            }
+        }
+    }
+}
+
+.rich-content {
+    pre {
+        padding: 14px 10px 14px;
+    }
+}
+
+.webhacker-content {
+    .webhacker-code-language {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        z-index: 2;
+        display: flex;
+        flex-direction: row;
+        gap: 6px;
+        align-items: center;
+
+        &__picker {
+            position: relative;
+        }
+
+        &__trigger {
+            min-width: 124px;
+            height: 24px;
+            padding: 2px 28px 2px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--code-badge-border);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0)),
+                var(--code-badge-bg);
+            color: var(--code-badge-text);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            line-height: 1;
+            cursor: pointer;
+            position: relative;
+            text-align: left;
+            white-space: nowrap;
+            outline: none;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+            &::after {
+                content: "";
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-40%);
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-top: 6px solid #94a3b8;
+            }
+
+            &:hover {
+                border-color: #7da2cf;
+            }
+
+            &:focus-visible {
+                outline: 0;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
+            }
+        }
+
+        &__menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            min-width: 170px;
+            max-height: 220px;
+            overflow: auto;
+            border-radius: 12px;
+            border: 1px solid #2f3f58;
+            background: #0f172a;
+            padding: 6px;
+            box-shadow: 0 12px 24px rgba(2, 6, 23, 0.45);
+            z-index: 4;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #5b6f8f #0b1323;
+
+            &::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: #0b1323;
+                border-radius: 8px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: linear-gradient(180deg, #6b85ab, #4d6283);
+                border-radius: 8px;
+                border: 1px solid #0f172a;
+            }
+
+            &--hidden {
+                display: none;
+            }
+        }
+
+        &__item {
+            width: 100%;
+            display: block;
+            text-align: left;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #d5deea;
+            padding: 7px 8px;
+            font-size: 12px;
+            cursor: pointer;
+
+            &:hover {
+                background: rgba(148, 163, 184, 0.16);
+            }
+
+            &.is-active {
+                background: rgba(59, 130, 246, 0.25);
+                color: #bfdbfe;
+            }
+        }
+
+        &__delete {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 1px solid var(--code-badge-border);
+            background: var(--code-badge-bg);
+            color: var(--code-badge-text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+            &:hover {
+                background: rgba(127, 29, 29, 0.65);
+                border-color: rgba(248, 113, 113, 0.5);
+                color: #fecaca;
+            }
+
+            &:focus-visible {
+                outline: 0;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
+            }
+        }
+    }
+
+    .webhacker-code-exit {
+        position: absolute;
+        right: 10px !important;
+        bottom: 8px !important;
+        top: auto !important;
+        left: auto !important;
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--code-badge-border);
+        background: var(--code-badge-bg);
+        color: var(--code-badge-text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 3;
+
+        &:hover {
+            border-color: #7da2cf;
+        }
+    }
+
+    .webhacker-code-language [data-tooltip]::after,
+    .webhacker-code-exit[data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        right: 0;
+        top: calc(100% + 6px);
+        background: #1e2251;
+        color: #fff;
+        padding: 4px 6px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+        z-index: 6;
+    }
+
+    .webhacker-code-language [data-tooltip]:hover::after,
+    .webhacker-code-language [data-tooltip]:focus-visible::after,
+    .webhacker-code-exit[data-tooltip]:hover::after,
+    .webhacker-code-exit[data-tooltip]:focus-visible::after {
+        opacity: 1;
+    }
+}
+

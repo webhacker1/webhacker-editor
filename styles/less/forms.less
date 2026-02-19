@@ -1,0 +1,48 @@
+.webhacker-color {
+    display: flex;
+    gap: 10px;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+
+    &__swatches {
+        display: grid;
+        grid-template-columns: repeat(5, 18px);
+        gap: 6px;
+    }
+}
+
+.webhacker-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+
+    &[aria-selected="true"] {
+        outline: 2px solid var(--accent-color);
+    }
+}
+
+.webhacker-input,
+.webhacker-file,
+.webhacker-select {
+    padding: 8px;
+    width: 180px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+.webhacker-form {
+    display: grid;
+    gap: 8px;
+}
+
+.webhacker-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+

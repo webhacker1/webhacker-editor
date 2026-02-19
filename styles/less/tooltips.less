@@ -1,0 +1,28 @@
+.webhacker-button[data-tooltip] {
+    position: relative;
+
+    &:not([aria-disabled="true"])::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 50%;
+        transform: translate(-50%, -4px);
+        background: #1e2251;
+        color: #fff;
+        padding: 4px 6px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+        z-index: 30;
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
