@@ -32,7 +32,7 @@ export function bindKeyboardEvents(editor) {
         if (event.key === "Enter" && inlineCodeElement) {
             event.preventDefault();
             placeCaretAfterElement(inlineCodeElement);
-            executeRichCommand("insertHTML", "<br>");
+            executeRichCommand("insertLineBreak");
             editor.emitChange();
             editor.syncToggleStates();
             return;
