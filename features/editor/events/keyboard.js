@@ -2,18 +2,64 @@ import { executeRichCommand } from "../../../core/commands.js";
 import { getSelectionAnchorElement } from "./utils.js";
 import { placeCaretAfterElement } from "../selection.js";
 
+function isCaretAtCodeStart(codeElement, selection) {
+    if (!selection || selection.rangeCount === 0) return false;
+    const currentRange = selection.getRangeAt(0);
+    if (!selection.isCollapsed || !codeElement.contains(currentRange.startContainer)) return false;
+
+    const beforeCaretRange = currentRange.cloneRange();
+    beforeCaretRange.selectNodeContents(codeElement);
+    beforeCaretRange.setEnd(currentRange.startContainer, currentRange.startOffset);
+    const beforeCaretText = beforeCaretRange.toString().replace(/\u200B/g, "");
+
+    return beforeCaretText.length === 0;
+}
+
 export function bindKeyboardEvents(editor) {
     editor.contentEditableElement.addEventListener("keydown", event => {
         const pressedKey = event.key.toLowerCase();
         const hasCommandModifier = event.ctrlKey || event.metaKey;
         const selection = window.getSelection();
         const anchorNode = getSelectionAnchorElement(selection);
-        const activeCodeElement = anchorNode && anchorNode.closest ? anchorNode.closest("pre code") : null;
+        const activePreElement = anchorNode && anchorNode.closest ? anchorNode.closest("pre") : null;
+        const activeCodeElement = activePreElement
+            ? activePreElement.querySelector("code")
+            : anchorNode && anchorNode.closest
+              ? anchorNode.closest("pre code")
+              : null;
         const nearestCodeElement = anchorNode && anchorNode.closest ? anchorNode.closest("code") : null;
         const inlineCodeElement =
             nearestCodeElement && nearestCodeElement.closest && !nearestCodeElement.closest("pre")
                 ? nearestCodeElement
                 : null;
+
+        if ((event.key === "Backspace" || event.key === "Delete") && activePreElement) {
+            const codeElement = activePreElement.querySelector("code");
+            if (!codeElement) {
+                event.preventDefault();
+                return;
+            }
+
+            if (!activeCodeElement) {
+                event.preventDefault();
+                return;
+            }
+
+            if (
+                event.key === "Backspace" &&
+                selection &&
+                selection.isCollapsed &&
+                isCaretAtCodeStart(activeCodeElement, selection)
+            ) {
+                event.preventDefault();
+                return;
+            }
+        }
+
+        if (hasCommandModifier && pressedKey === "a" && activeCodeElement) {
+            event.preventDefault();
+            return;
+        }
 
         if (event.key === "Tab" && activeCodeElement) {
             event.preventDefault();
@@ -32,7 +78,7 @@ export function bindKeyboardEvents(editor) {
         if (event.key === "Enter" && inlineCodeElement) {
             event.preventDefault();
             placeCaretAfterElement(inlineCodeElement);
-            executeRichCommand("insertLineBreak");
+            executeRichCommand("insertParagraph");
             editor.emitChange();
             editor.syncToggleStates();
             return;
@@ -57,19 +103,19 @@ export function bindKeyboardEvents(editor) {
             }
         }
 
-        if (hasCommandModifier && pressedKey === "b") {
+        if (hasCommandModifier && pressedKey === "b" && !activeCodeElement) {
             event.preventDefault();
             executeRichCommand("bold");
             editor.emitChange();
             editor.syncToggleStates();
         }
-        if (hasCommandModifier && pressedKey === "i") {
+        if (hasCommandModifier && pressedKey === "i" && !activeCodeElement) {
             event.preventDefault();
             executeRichCommand("italic");
             editor.emitChange();
             editor.syncToggleStates();
         }
-        if (hasCommandModifier && pressedKey === "u") {
+        if (hasCommandModifier && pressedKey === "u" && !activeCodeElement) {
             event.preventDefault();
             executeRichCommand("underline");
             editor.emitChange();

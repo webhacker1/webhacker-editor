@@ -119,6 +119,36 @@ WebHackerEditor.prototype.syncToggleStates = function () {
     updateToggleButton("alignLeft", readCommandState("justifyLeft"));
     updateToggleButton("alignCenter", readCommandState("justifyCenter"));
     updateToggleButton("alignRight", readCommandState("justifyRight"));
+
+    const selection = window.getSelection();
+    const anchorNode =
+        selection && selection.anchorNode && selection.anchorNode.nodeType === 3
+            ? selection.anchorNode.parentNode
+            : selection && selection.anchorNode;
+    const activeCodeElement = anchorNode && anchorNode.closest ? anchorNode.closest("pre code") : null;
+    const blockedInCodeBlock = new Set([
+        "code",
+        "imageDisabled",
+        "bold",
+        "italic",
+        "underline",
+        "color",
+        "link",
+        "heading",
+        "alignLeft",
+        "alignCenter",
+        "alignRight",
+        "unorderedList",
+        "orderedList",
+        "table",
+        "resetStyles"
+    ]);
+    this.toolbarElement.querySelectorAll(".webhacker-button[data-control-id]").forEach(buttonElement => {
+        const controlId = buttonElement.getAttribute("data-control-id");
+        const shouldDisable = Boolean(activeCodeElement) && blockedInCodeBlock.has(controlId);
+        buttonElement.disabled = shouldDisable;
+        buttonElement.setAttribute("aria-disabled", shouldDisable ? "true" : "false");
+    });
 };
 
 WebHackerEditor.prototype.saveSelectionRange = function () {

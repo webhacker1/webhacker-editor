@@ -12,7 +12,15 @@ export function buildToolbar(editor, toolbarElement, t) {
 
         const groupElement = createElement("div", "webhacker-toolbar__group");
         layoutItem.forEach(controlId => {
-            groupElement.appendChild(createToolbarControl(controlId, editor, t));
+            const controlElement = createToolbarControl(controlId, editor, t);
+            const controlButtonElement =
+                controlElement && controlElement.tagName === "BUTTON"
+                    ? controlElement
+                    : controlElement.querySelector && controlElement.querySelector(".webhacker-button");
+            if (controlButtonElement) {
+                controlButtonElement.setAttribute("data-control-id", controlId);
+            }
+            groupElement.appendChild(controlElement);
         });
         toolbarElement.appendChild(groupElement);
     });

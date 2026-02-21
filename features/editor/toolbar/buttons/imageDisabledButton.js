@@ -7,8 +7,12 @@ export function createImageDisabledButton(_editor, t) {
         "aria-disabled": "true",
         "data-tooltip": t.soon
     });
-    const iconElement = createElement("i", "fa-solid fa-image");
-    buttonElement.appendChild(iconElement);
+    const iconWrapElement = createElement("span", "webhacker-button__icon-lock");
+    const imageIconElement = createElement("i", "fa-solid fa-image");
+    const lockIconElement = createElement("i", "fa-solid fa-lock");
+    lockIconElement.setAttribute("aria-hidden", "true");
+    iconWrapElement.append(imageIconElement, lockIconElement);
+    buttonElement.appendChild(iconWrapElement);
     buttonElement.disabled = true;
     return buttonElement;
 }

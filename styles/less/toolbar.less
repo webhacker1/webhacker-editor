@@ -59,7 +59,8 @@
         cursor: not-allowed;
         position: relative;
 
-        > i {
+        > i,
+        > span > i {
             opacity: 0.5;
         }
 
@@ -88,6 +89,30 @@
 
     &[aria-disabled="true"]:hover::after {
         opacity: 1;
+    }
+}
+
+.webhacker-button__icon-lock {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+
+    > .fa-image {
+        color: var(--muted-color);
+    }
+
+    > .fa-lock {
+        position: absolute;
+        right: -0.34em;
+        bottom: -0.26em;
+        font-size: 0.56em;
+        color: #9ca3af;
+        background: var(--background-color);
+        border-radius: 50%;
+        padding: 0.06em;
     }
 }
 
