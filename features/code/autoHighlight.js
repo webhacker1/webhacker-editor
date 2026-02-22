@@ -2,7 +2,7 @@ import { highlightCodeBlocksInElement } from "./engine.js";
 
 function autoHighlightRichContent() {
     if (typeof document === "undefined") return;
-    document.querySelectorAll(".rich-content").forEach(rootElement => {
+    document.querySelectorAll(".webhacker-view-content").forEach(rootElement => {
         highlightCodeBlocksInElement(rootElement);
     });
 }
@@ -14,4 +14,3 @@ if (typeof document !== "undefined") {
         autoHighlightRichContent();
     }
 }
-

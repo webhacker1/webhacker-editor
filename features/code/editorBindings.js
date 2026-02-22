@@ -84,15 +84,10 @@ function getCaretOffsetInElement(containerElement) {
     const range = selection.getRangeAt(0);
     if (!containerElement.contains(range.startContainer)) return 0;
 
-    const walker = document.createTreeWalker(containerElement, NodeFilter.SHOW_TEXT);
-    let offset = 0;
-    let currentNode = walker.nextNode();
-    while (currentNode) {
-        if (currentNode === range.startContainer) return offset + range.startOffset;
-        offset += currentNode.nodeValue.length;
-        currentNode = walker.nextNode();
-    }
-    return offset;
+    const beforeCaretRange = range.cloneRange();
+    beforeCaretRange.selectNodeContents(containerElement);
+    beforeCaretRange.setEnd(range.startContainer, range.startOffset);
+    return beforeCaretRange.toString().replace(/\u200B/g, "").length;
 }
 
 function setCaretOffsetInElement(containerElement, targetOffset) {
@@ -227,8 +222,12 @@ WebHackerEditor.prototype.ensureCodeLanguageBadge = function (preElement) {
 
 WebHackerEditor.prototype.highlightCodeBlocks = function () {
     this.contentEditableElement.querySelectorAll("pre").forEach(preElement => {
+        preElement.removeAttribute("style");
+        preElement.removeAttribute("align");
         const codeElement = preElement.querySelector("code");
         if (!codeElement) return;
+        codeElement.removeAttribute("style");
+        codeElement.removeAttribute("align");
         highlightCodeElementInternal(codeElement);
         this.ensureCodeLanguageBadge(preElement);
     });
@@ -246,9 +245,7 @@ WebHackerEditor.prototype.highlightCodeAtCaret = function () {
 
     const caretOffset = getCaretOffsetInElement(codeElement);
     this.highlightCodeElement(codeElement);
-    const maxOffset = (codeElement.innerText ?? codeElement.textContent ?? "")
-        .replace(/\u200B/g, "")
-        .length;
+    const maxOffset = (codeElement.textContent ?? "").replace(/\u200B/g, "").length;
     setCaretOffsetInElement(codeElement, Math.min(caretOffset, maxOffset));
     this.ensureCodeLanguageBadge(codeElement.closest("pre"));
 };

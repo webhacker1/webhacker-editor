@@ -1,15 +1,22 @@
 export function applyThemeVariables(editorRootElement, themeOptions) {
     if (!themeOptions) return;
+
+    const inlineBackground =
+        themeOptions.codeInlineBackground ||
+        themeOptions.codeBlockBackground ||
+        themeOptions.backgroundColor;
+    const inlineBorder =
+        themeOptions.codeInlineBorder || themeOptions.codeBlockBorder || themeOptions.backgroundColor;
+    const inlineText =
+        themeOptions.codeInlineText || themeOptions.codeBlockText || themeOptions.textColor;
+
     if (themeOptions.backgroundColor)
         editorRootElement.style.setProperty("--background-color", themeOptions.backgroundColor);
     if (themeOptions.textColor)
         editorRootElement.style.setProperty("--text-color", themeOptions.textColor);
-    if (themeOptions.codeInlineBackground)
-        editorRootElement.style.setProperty("--code-inline-bg", themeOptions.codeInlineBackground);
-    if (themeOptions.codeInlineBorder)
-        editorRootElement.style.setProperty("--code-inline-border", themeOptions.codeInlineBorder);
-    if (themeOptions.codeInlineText)
-        editorRootElement.style.setProperty("--code-inline-text", themeOptions.codeInlineText);
+    if (inlineBackground) editorRootElement.style.setProperty("--code-inline-bg", inlineBackground);
+    if (inlineBorder) editorRootElement.style.setProperty("--code-inline-border", inlineBorder);
+    if (inlineText) editorRootElement.style.setProperty("--code-inline-text", inlineText);
     if (themeOptions.codeBlockBackground)
         editorRootElement.style.setProperty("--code-block-bg", themeOptions.codeBlockBackground);
     if (themeOptions.codeBlockBorder)

@@ -8,6 +8,7 @@ export function createHeadingDropdown(editor, t) {
         "fa-solid fa-heading",
         t.headings
     );
+    dropdownMenuElement.classList.add("webhacker-menu--select");
 
     [
         { label: t.paragraph, tag: "p" },
@@ -16,7 +17,9 @@ export function createHeadingDropdown(editor, t) {
         { label: "H3", tag: "h3" }
     ].forEach(({ label, tag }) => {
         const menuItemElement = createElement("div", "webhacker-menu__item");
-        menuItemElement.textContent = label;
+        const labelElement = createElement("span", "webhacker-menu__item-label");
+        labelElement.textContent = label;
+        menuItemElement.appendChild(labelElement);
         menuItemElement.addEventListener("mousedown", event => event.preventDefault());
         menuItemElement.addEventListener(
             "click",

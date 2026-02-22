@@ -60,6 +60,7 @@ export function createMenuAction(editor, actionCallback) {
         editor.restoreSelectionRange(editor.currentSavedSelectionRange);
 
         if (actionCallback) actionCallback();
+        if (typeof editor.highlightCodeBlocks === "function") editor.highlightCodeBlocks();
 
         editor.emitChange();
         editor.syncToggleStates();

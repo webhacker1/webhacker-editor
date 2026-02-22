@@ -111,6 +111,21 @@ function toggleCodeBlock(editor, language) {
     editor.ensureCodeLanguageBadge(preElement);
 }
 
+function createSelectMenuItem(editor, labelText, onClickHandler, badgeText = null) {
+    const menuItemElement = createElement("div", "webhacker-menu__item");
+    const labelElement = createElement("span", "webhacker-menu__item-label");
+    labelElement.textContent = labelText;
+    menuItemElement.appendChild(labelElement);
+    if (badgeText) {
+        const badgeElement = createElement("span", "webhacker-menu__item-badge");
+        badgeElement.textContent = badgeText;
+        menuItemElement.appendChild(badgeElement);
+    }
+    menuItemElement.addEventListener("mousedown", event => event.preventDefault());
+    menuItemElement.addEventListener("click", createMenuAction(editor, onClickHandler));
+    return menuItemElement;
+}
+
 export function createCodeDropdown(editor, t) {
     const codeT = t.code;
     const { dropdownWrapperElement, dropdownMenuElement } = createDropdown(
@@ -118,21 +133,20 @@ export function createCodeDropdown(editor, t) {
         "fa-solid fa-code",
         codeT.label
     );
+    dropdownMenuElement.classList.add("webhacker-menu--select");
+    const newBadgeText = codeT.newBadge || "NEW";
 
-    const inlineCodeItemElement = createElement("div", "webhacker-menu__item");
-    inlineCodeItemElement.textContent = codeT.inline;
-    inlineCodeItemElement.addEventListener("mousedown", event => event.preventDefault());
-    inlineCodeItemElement.addEventListener(
-        "click",
-        createMenuAction(editor, () => toggleInlineCode(editor))
+    const inlineCodeItemElement = createSelectMenuItem(
+        editor,
+        codeT.inline,
+        () => toggleInlineCode(editor),
+        newBadgeText
     );
-
-    const blockCodeItemElement = createElement("div", "webhacker-menu__item");
-    blockCodeItemElement.textContent = codeT.block;
-    blockCodeItemElement.addEventListener("mousedown", event => event.preventDefault());
-    blockCodeItemElement.addEventListener(
-        "click",
-        createMenuAction(editor, () => toggleCodeBlock(editor, "plaintext"))
+    const blockCodeItemElement = createSelectMenuItem(
+        editor,
+        codeT.block,
+        () => toggleCodeBlock(editor, "plaintext"),
+        newBadgeText
     );
 
     dropdownMenuElement.append(inlineCodeItemElement, blockCodeItemElement);

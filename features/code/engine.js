@@ -65,7 +65,7 @@ export function setCodeLanguage(codeElement, language) {
 }
 
 export function highlightCodeElementInternal(codeElement) {
-    const rawText = (codeElement.innerText ?? codeElement.textContent ?? "").replace(/\u200B/g, "");
+    const rawText = (codeElement.textContent ?? "").replace(/\u200B/g, "");
     const language = getCodeLanguage(codeElement);
 
     if (!rawText.length) {

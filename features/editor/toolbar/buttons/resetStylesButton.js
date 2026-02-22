@@ -7,4 +7,3 @@ export function createResetStylesButton(editor, t) {
         commandName: "removeFormat"
     });
 }
-

@@ -9,6 +9,7 @@ code:
   label: "Code"
   inline: "Inline code"
   block: "Code block"
+  newBadge: "New"
   languageLabel: "Code language"
   deleteBlock: "Delete code block"
   exitBlock: "Exit code block"

@@ -137,9 +137,11 @@ function getToolbarButtonByLabel(editor, label) {
 }
 
 function getMenuItemByText(editor, text) {
-    return [...editor.toolbarElement.querySelectorAll(".webhacker-menu__item")].find(
-        itemElement => itemElement.textContent.trim() === text
-    );
+    return [...editor.toolbarElement.querySelectorAll(".webhacker-menu__item")].find(itemElement => {
+        const labelElement = itemElement.querySelector(".webhacker-menu__item-label");
+        const labelText = labelElement ? labelElement.textContent.trim() : itemElement.textContent.trim();
+        return labelText === text;
+    });
 }
 
 describe("toolbar buttons", () => {
@@ -205,10 +207,12 @@ describe("toolbar buttons", () => {
     });
 
     it("handles color dropdown actions", () => {
+        const highlightSpy = vi.spyOn(editor, "highlightCodeBlocks");
         click(getToolbarButtonByLabel(editor, "Text color"));
         const swatchButtonElement = editor.toolbarElement.querySelector(".webhacker-swatch");
         click(swatchButtonElement);
         expect(execCommandMock.mock.calls.some(([command]) => command === "foreColor")).toBe(true);
+        expect(highlightSpy).toHaveBeenCalled();
     });
 
     it("handles link dropdown actions", () => {
@@ -233,5 +237,27 @@ describe("toolbar buttons", () => {
         const tableCellPickerElement = editor.toolbarElement.querySelector(".webhacker-tablepick__cell");
         click(tableCellPickerElement);
         expect(editor.contentEditableElement.querySelector("table.wh-table")).not.toBeNull();
+    });
+
+    it("keeps code blocks and restores code controls after reset styles", () => {
+        editor.contentEditableElement.innerHTML =
+            '<p><strong>hello</strong> <code>inline</code></p><pre><code class="language-plaintext">const a = 1;</code></pre>';
+        editor.highlightCodeBlocks();
+
+        const range = document.createRange();
+        range.selectNodeContents(editor.contentEditableElement);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        click(getToolbarButtonByLabel(editor, "Reset styles"));
+
+        expect(execCommandMock).toHaveBeenCalledWith("removeFormat", false, null);
+        const preElement = editor.contentEditableElement.querySelector("pre");
+        expect(preElement).not.toBeNull();
+        expect(preElement.querySelector("code")).not.toBeNull();
+        expect(preElement.querySelector(".webhacker-code-language")).not.toBeNull();
+        expect(preElement.querySelector(".webhacker-code-exit")).not.toBeNull();
+        expect(editor.contentEditableElement.textContent).toContain("const a = 1;");
     });
 });

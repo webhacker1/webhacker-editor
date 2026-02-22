@@ -9,6 +9,7 @@ code:
   label: "Код"
   inline: "Код в строке"
   block: "Блок кода"
+  newBadge: "Новое"
   languageLabel: "Язык кода"
   deleteBlock: "Удалить блок кода"
   exitBlock: "Выйти из блока кода"

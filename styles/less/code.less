@@ -1,5 +1,5 @@
 .webhacker-content,
-.rich-content {
+.webhacker-view-content {
     code {
         font-family: "Consolas", "Courier New", monospace;
         font-size: 0.92em;
@@ -15,6 +15,7 @@
         padding: 36px 14px 38px;
         background: var(--code-block-bg);
         color: var(--code-block-text);
+        text-align: left;
         border: 1px solid var(--code-block-border);
         border-radius: 10px;
         overflow: visible;
@@ -77,7 +78,7 @@
     }
 }
 
-.rich-content {
+.webhacker-view-content {
     pre {
         padding: 14px 10px 14px;
     }
@@ -255,8 +256,8 @@
         position: absolute;
         right: 0;
         top: calc(100% + 6px);
-        background: #1e2251;
-        color: #fff;
+        background: var(--tooltip-bg);
+        color: var(--white);
         padding: 4px 6px;
         border-radius: 6px;
         font-size: 12px;
@@ -274,4 +275,3 @@
         opacity: 1;
     }
 }
-

@@ -8,7 +8,10 @@ export function createCommandButton(
     return createToolbarButton(editor, {
         iconClassName,
         buttonTitleText: title,
-        onClickHandler: () => executeRichCommand(commandName, commandValue),
+        onClickHandler: () => {
+            executeRichCommand(commandName, commandValue);
+            if (typeof editor.highlightCodeBlocks === "function") editor.highlightCodeBlocks();
+        },
         trackToggleState,
         toggleKey
     });
