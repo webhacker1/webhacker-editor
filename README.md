@@ -1,8 +1,8 @@
 <p align="center">
   <a href="#" target="_blank">
-    <img src="./docs/assets/logo.png" alt="WebHacker Editor" height="90"><br/>
+    <img src="./docs/assets/logo.png" alt="WebHacker Editor" height="400"><br/>
   </a>
-  WEB HACKER EDITOR
+  <h1 align="center">WEB HACKER EDITOR</h1>
 </p>
 
 <p align="center">
