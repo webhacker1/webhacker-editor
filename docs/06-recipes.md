@@ -1,68 +1,51 @@
-# Рецепты
+# Рецепты (быстрые задачи)
 
-## 1) Добавить новый язык подсветки кода
+Короткие сценарии формата: "что нужно сделать" -> "где менять".
 
-1. Подключить язык в `features/code/engine.js`:
-   - импорт модуля из `highlight.js/lib/languages/...`
-   - добавить в `LANGUAGE_MODULES`
-2. Добавить язык в `constants/codeLanguages.js`.
-3. Добавить переводы названия языка в:
-   - `translations/en.yml`
-   - `translations/ru.yml`
-4. Прогнать `npm test` и `npm run build`.
+## 1) Добавить язык подсветки кода
 
-## 2) Добавить новый пункт в code language picker
+1. Добавь язык в `features/code/engine.js`.
+2. Добавь его в `constants/codeLanguages.js`.
+3. Добавь переводы в `translations/ru.yml` и `translations/en.yml`.
+4. Проверь в UI и прогони тесты.
 
-1. Обновить `constants/codeLanguages.js`.
-2. Проверить соответствие `labelKey` в переводах.
-3. Проверить рендер picker в `features/code/editorBindings.js` (там используется `CODE_LANGUAGE_OPTIONS`).
+## 2) Добавить новую кнопку в toolbar
 
-## 3) Добавить новый sanitize rule
+1. Создай файл кнопки в `features/editor/toolbar/buttons/`.
+2. Подключи в `registry.js`.
+3. Добавь id кнопки в `layout.js`.
+4. Добавь перевод текста кнопки.
+5. Прогони `npm test` и `npm run build`.
 
-1. Определить слой:
-   - фильтр тега/узла: `sanitize/nodes.js`
-   - фильтр атрибутов: `sanitize/attributes.js`
-   - фильтр стилей: `sanitize/styles.js`
-   - URL/цветы и прочие утилиты: `sanitize/utils.js`
-2. Добавить тест в:
-   - `tests/sanitize.utils.test.js` или
-   - `tests/sanitize.html.test.js`
+## 3) Изменить поведение вставки (paste)
 
-## 4) Добавить новую кнопку toolbar
+1. Открой `features/editor/events/clipboard.js`.
+2. Измени логику вставки.
+3. Добавь/обнови тесты sanitize.
+4. Проверь вручную вставку из внешнего сайта.
 
-1. Создать файл кнопки в `features/editor/toolbar/buttons/`.
-2. Подключить в `registry.js`.
-3. Добавить id в `layout.js`.
-4. Добавить переводы.
-5. Добавить тест в `tests/toolbar.buttons.test.js`.
+## 4) Усилить sanitize
 
-## 5) Добавить новый обработчик событий редактора
+1. Если нужно убрать тег -> `sanitize/nodes.js`.
+2. Если нужно убрать атрибут -> `sanitize/attributes.js`.
+3. Если нужно убрать CSS-свойство -> `sanitize/styles.js`.
+4. Сразу добавь тест в `tests/sanitize.html.test.js`.
 
-1. Выбрать модуль:
-   - `features/editor/events/input.js`
-   - `features/editor/events/clipboard.js`
-   - `features/editor/events/selection.js`
-   - `features/editor/events/keyboard.js`
-2. Добавить логику в соответствующий bind-функционал.
-3. Если нужен новый тип событий, добавить новый файл и подключить его в `features/editor/events/index.js`.
+## 5) Не работает подсветка кода в view
 
-## 6) Где искать проблему по симптомам
+1. Проверь класс контейнера: `.webhacker-view-content`.
+2. Проверь вызов `highlightCodeBlocksInElement(...)` после `innerHTML`.
+3. Проверь, что подключен актуальный `dist/webhacker-editor.bundle.js`.
 
-1. Подсветка кода сломалась:
-   - `features/code/engine.js`
-   - `features/code/editorBindings.js`
+## 6) Не подтягиваются цвета темы
 
-2. Кнопка не работает:
-   - `features/editor/toolbar/buttons/*.js`
-   - `features/editor/toolbar/registry.js`
-   - `features/editor/toolbar/layout.js`
+1. Проверь CSS variables в проекте-хосте.
+2. Минимум: `--text-color`, `--secondary-color`, `--border-color2`.
+3. Проверь, нет ли более специфичных CSS-правил, которые перебивают редактор.
 
-3. Странности при copy/paste:
-   - `features/editor/events/clipboard.js`
-   - `sanitize/*`
+## 7) Что дальше
 
-4. Санитайз пропускает лишнее:
-   - `sanitize/attributes.js`
-   - `sanitize/nodes.js`
-   - `constants/allowedTags.js`
+Если внедряешь в продукт, читай:
 
+1. `docs/08-integration-guide.md`
+2. `docs/07-integration-contract.md`

@@ -1,71 +1,57 @@
-# Архитектура
+# Архитектура проекта
+Карта проекта: где что лежит и куда идти, если нужно внести изменения.
 
-## Слои проекта
+## 1) Основные представления
 
-### `core/`
+Проект состоит из 4 больших частей:
 
-Базовая инфраструктура редактора, без продуктовой логики фич:
+1. `core/`  
+"Скелет" редактора: создание UI, базовые методы, общая логика.
+
+2. `features/`  
+Фичи редактора: toolbar, события, code block, таблицы.
+
+3. `sanitize/`  
+Очистка HTML: убираем лишние теги/атрибуты/стили.
+
+4. `styles/` и `whEditor.less`  
+Внешний вид редактора и режима просмотра.
+
+## 2) Главные файлы
 
 1. `core/WebHackerEditor.js`  
-Базовый класс, рендер контейнера, базовые методы (`getHTML`, `setHTML`, toggle/menu helpers, sync states).
+Главный класс редактора. Здесь методы `getHTML`, `setHTML`, `setTheme`.
 
-2. `core/commands.js`  
-Тонкая обертка над `document.execCommand`.
+2. `features/editor/events/`  
+Обработка ввода, вставки, клавиш, выделения.
 
-### `features/`
+3. `features/editor/toolbar/`  
+Сборка toolbar и кнопки.
 
-Логика разбита по доменам:
+4. `features/code/`  
+Работа с `pre code`, подсветка, выбор языка.
 
-1. `features/code/`  
-Подсветка, UI поверх code block, сериализация/десериализация кода, автоподсветка в режиме просмотра.
+5. `sanitize/sanitize.js`  
+Точка входа в очистку HTML.
 
-2. `features/editor/toolbar/`  
-Сборка тулбара, layout, registry, реализации кнопок (каждая кнопка в отдельном файле).
+## 3) Путь данных (от ввода до сохранения)
 
-3. `features/editor/events/`  
-События редактора:
-   - `input.js`
-   - `clipboard.js`
-   - `selection.js`
-   - `keyboard.js`
-   - `index.js` (оркестрация)
-
-4. `features/editor/selection.js`  
-Утилиты работы с selection/caret.
-
-5. `features/table/editorBindings.js`  
-Логика вставки/редактирования таблиц.
-
-### `sanitize/`
-
-Слой очистки HTML:
-
-1. `sanitize/sanitize.js` — вход в санитайз
-2. `sanitize/nodes.js` — обход DOM-узлов
-3. `sanitize/attributes.js` — фильтрация атрибутов
-4. `sanitize/styles.js` — фильтрация inline-style
-5. `sanitize/utils.js` — утилиты (`sanitizeHref`, `escapeHtml`, и т.д.)
-
-### Прочее
-
-1. `constants/` — константы (`allowedTags`, `codeLanguages`, `colors`)
-2. `translations/` — `ru.yml`, `en.yml`
-3. `tests/` — unit/integration тесты
-4. `whEditor.less` — стили редактора
-
-## Поток данных
-
-1. Пользователь вводит/вставляет контент в `contenteditable`.
-2. Слой `features/editor/events/*` обрабатывает события.
-3. Для code block вызывается logic из `features/code/*`.
+1. Пользователь печатает или вставляет текст в `contenteditable`.
+2. События обрабатываются в `features/editor/events/*`.
+3. Если это код, включается логика из `features/code/*`.
 4. При сохранении вызывается `editor.getHTML()`.
-5. `getHTML()` прогоняет HTML через `sanitizeHtmlStringToSafeHtml`.
-6. На выводе (`view`) HTML также санитизируется и подсвечивается.
+5. `getHTML()` запускает sanitize и отдает безопасный HTML.
 
-## Принципы, которые уже приняты
+## 4) Где искать проблему
 
-1. Feature-first структура: логика рядом с доменом.
-2. Один файл — одна ответственность (особенно для toolbar-кнопок).
-3. Санитайз обязателен перед хранением/рендером.
-4. Публичный бандл один: `dist/webhacker-editor.bundle.js`.
+1. Не работает кнопка toolbar -> `features/editor/toolbar/*`.
+2. Странная вставка текста -> `features/editor/events/clipboard.js`.
+3. Ломается code block -> `features/code/*`.
+4. Пропускается небезопасный HTML -> `sanitize/*`.
+5. Проблема с цветами/темой -> `styles/*` и `ui/theme.js`.
 
+## 5) Что дальше
+
+Следующий файл:
+
+1. `docs/03-toolbar.md`

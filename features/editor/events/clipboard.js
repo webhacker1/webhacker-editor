@@ -1,14 +1,12 @@
-import { sanitizeHtmlStringToSafeHtml } from "../../../sanitize/sanitize.js";
 import { escapeHtml } from "../../../sanitize/utils.js";
 import { getSelectionAnchorElement } from "./utils.js";
 
-function stripEditorUiFromHtml(rawHtml) {
+function extractPlainTextFromClipboard(htmlData, textData) {
+    if (typeof textData === "string" && textData.length) return textData;
+    if (!htmlData) return "";
     const templateElement = document.createElement("template");
-    templateElement.innerHTML = String(rawHtml ?? "");
-    templateElement.content.querySelectorAll(".webhacker-code-language").forEach(element => {
-        element.remove();
-    });
-    return templateElement.innerHTML;
+    templateElement.innerHTML = String(htmlData);
+    return templateElement.content.textContent || "";
 }
 
 export function bindClipboardEvents(editor) {
@@ -17,12 +15,12 @@ export function bindClipboardEvents(editor) {
         const clipboardData = event.clipboardData || window.clipboardData;
         const htmlData = clipboardData.getData("text/html");
         const textData = clipboardData.getData("text/plain");
+        const pasteText = extractPlainTextFromClipboard(htmlData, textData);
         const selection = window.getSelection();
         const anchorNode = getSelectionAnchorElement(selection);
         const activeCodeElement = anchorNode && anchorNode.closest ? anchorNode.closest("pre code") : null;
 
         if (activeCodeElement) {
-            const pasteText = textData ?? "";
             const range = selection.getRangeAt(0);
             range.deleteContents();
             const textNode = document.createTextNode(pasteText);
@@ -40,14 +38,8 @@ export function bindClipboardEvents(editor) {
             return;
         }
 
-        if (htmlData) {
-            const cleanedClipboardHtml = stripEditorUiFromHtml(htmlData);
-            const safeHtml = sanitizeHtmlStringToSafeHtml(cleanedClipboardHtml, {
-                stripColors: true
-            });
-            document.execCommand("insertHTML", false, safeHtml);
-        } else if (textData) {
-            const safeTextHtml = escapeHtml(textData).replace(/\r?\n/g, "<br>");
+        if (pasteText) {
+            const safeTextHtml = escapeHtml(pasteText).replace(/\r?\n/g, "<br>");
             document.execCommand("insertHTML", false, safeTextHtml);
         }
         editor.emitChange();
@@ -74,4 +66,3 @@ export function bindClipboardEvents(editor) {
         event.preventDefault();
     });
 }
-

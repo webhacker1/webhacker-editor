@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WebHacker Editor View</title>
+</head>
+<body>
+    <article id="content" class="webhacker-view-content"></article>
+
+    <script src="./dist/webhacker-editor.bundle.js"></script>
+    <script>
+        const storageKey = "wh:safeContent";
+        const rawHtml =
+            localStorage.getItem(storageKey) ||
+            "<h1>Новый документ</h1><p>Здесь появится ваш текст.</p>";
+
+        const safeHtml = window.WebHackerEditor.sanitizeHtmlStringToSafeHtml(rawHtml);
+        const contentElement = document.getElementById("content");
+        contentElement.innerHTML = safeHtml;
+        window.WebHackerEditor.highlightCodeBlocksInElement(contentElement);
+    </script>
+
+</body>
+</html>
