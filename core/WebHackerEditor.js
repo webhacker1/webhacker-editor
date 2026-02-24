@@ -151,9 +151,18 @@ WebHackerEditor.prototype.syncToggleStates = function () {
         "table",
         "resetStyles"
     ]);
+    const activeTable = anchorNode && anchorNode.closest ? anchorNode.closest("table") : null;
+    const blockedInTable = new Set([
+        "code",
+        "table"
+    ]);
+
     this.toolbarElement.querySelectorAll(".webhacker-button[data-control-id]").forEach(buttonElement => {
         const controlId = buttonElement.getAttribute("data-control-id");
-        const shouldDisable = Boolean(activeCodeElement) && blockedInCodeBlock.has(controlId);
+        const shouldDisable =
+            (Boolean(activeCodeElement) && blockedInCodeBlock.has(controlId)) ||
+            (Boolean(activeTable) && blockedInTable.has(controlId))
+
         buttonElement.disabled = shouldDisable;
         buttonElement.setAttribute("aria-disabled", shouldDisable ? "true" : "false");
     });
