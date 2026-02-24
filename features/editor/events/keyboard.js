@@ -1,6 +1,7 @@
 import { executeRichCommand } from "../../../core/commands.js";
 import { getSelectionAnchorElement } from "./utils.js";
 import { placeCaretAfterElement } from "../selection.js";
+import { SHORTCUT_ACTIONS, matchesShortcutEvent } from "../shortcuts.js";
 
 function isCaretAtCodeStart(codeElement, selection) {
     if (!selection || selection.rangeCount === 0) return false;
@@ -15,9 +16,36 @@ function isCaretAtCodeStart(codeElement, selection) {
     return beforeCaretText.length === 0;
 }
 
+function getAdjacentTableCell(tableCellElement, step) {
+    if (!tableCellElement) return null;
+
+    const tableElement = tableCellElement.closest("table");
+    if (!tableElement) return null;
+
+    const tableCells = [...tableElement.rows].flatMap(tableRowElement => [...tableRowElement.cells]);
+    const currentCellIndex = tableCells.indexOf(tableCellElement);
+    if (currentCellIndex === -1) return null;
+
+    return tableCells[currentCellIndex + step] || null;
+}
+
+function triggerToolbarControl(editor, controlId) {
+    const controlButtonElement = editor.toolbarElement.querySelector(
+        `.webhacker-button[data-control-id="${controlId}"]`
+    );
+    if (!controlButtonElement || controlButtonElement.disabled) return false;
+
+    controlButtonElement.dispatchEvent(
+        new MouseEvent("click", {
+            bubbles: true,
+            cancelable: true
+        })
+    );
+    return true;
+}
+
 export function bindKeyboardEvents(editor) {
     editor.contentEditableElement.addEventListener("keydown", event => {
-        const pressedKey = event.key.toLowerCase();
         const hasCommandModifier = event.ctrlKey || event.metaKey;
         const selection = window.getSelection();
         const anchorNode = getSelectionAnchorElement(selection);
@@ -28,6 +56,8 @@ export function bindKeyboardEvents(editor) {
               ? anchorNode.closest("pre code")
               : null;
         const nearestCodeElement = anchorNode && anchorNode.closest ? anchorNode.closest("code") : null;
+        const activeTableCellElement =
+            anchorNode && anchorNode.closest ? anchorNode.closest("td,th") : null;
         const inlineCodeElement =
             nearestCodeElement && nearestCodeElement.closest && !nearestCodeElement.closest("pre")
                 ? nearestCodeElement
@@ -56,9 +86,29 @@ export function bindKeyboardEvents(editor) {
             }
         }
 
-        if (hasCommandModifier && pressedKey === "a" && activeCodeElement) {
+        if (hasCommandModifier && event.code === "KeyA" && !event.shiftKey && !event.altKey && activeCodeElement) {
             event.preventDefault();
             return;
+        }
+
+        const matchingShortcutAction = SHORTCUT_ACTIONS.find(shortcutAction =>
+            shortcutAction.shortcuts.some(shortcutDef => matchesShortcutEvent(event, shortcutDef))
+        );
+        if (matchingShortcutAction) {
+            if (activeCodeElement && !matchingShortcutAction.allowInCodeBlock) return;
+
+            if (matchingShortcutAction.type === "control") {
+                if (triggerToolbarControl(editor, matchingShortcutAction.controlId)) {
+                    event.preventDefault();
+                    return;
+                }
+            } else if (matchingShortcutAction.type === "command") {
+                event.preventDefault();
+                executeRichCommand(matchingShortcutAction.command);
+                editor.emitChange();
+                editor.syncToggleStates();
+                return;
+            }
         }
 
         if (event.key === "Tab" && activeCodeElement) {
@@ -66,6 +116,19 @@ export function bindKeyboardEvents(editor) {
             executeRichCommand("insertText", "    ");
             requestAnimationFrame(() => editor.highlightCodeAtCaret());
             editor.emitChange();
+            return;
+        }
+
+        if (event.key === "Tab" && activeTableCellElement && !activeCodeElement) {
+            event.preventDefault();
+            const direction = event.shiftKey ? -1 : 1;
+            const nextTableCellElement = getAdjacentTableCell(activeTableCellElement, direction);
+            if (nextTableCellElement) {
+                editor.ensureCaretAnchorInTableCell(nextTableCellElement, true);
+                editor.syncToggleStates();
+            } else if (!event.shiftKey) {
+                editor.exitTableToNextLine(activeTableCellElement);
+            }
             return;
         }
 
@@ -103,38 +166,5 @@ export function bindKeyboardEvents(editor) {
             }
         }
 
-        if (hasCommandModifier && pressedKey === "b" && !activeCodeElement) {
-            event.preventDefault();
-            executeRichCommand("bold");
-            editor.emitChange();
-            editor.syncToggleStates();
-        }
-        if (hasCommandModifier && pressedKey === "i" && !activeCodeElement) {
-            event.preventDefault();
-            executeRichCommand("italic");
-            editor.emitChange();
-            editor.syncToggleStates();
-        }
-        if (hasCommandModifier && pressedKey === "u" && !activeCodeElement) {
-            event.preventDefault();
-            executeRichCommand("underline");
-            editor.emitChange();
-            editor.syncToggleStates();
-        }
-        if (hasCommandModifier && pressedKey === "z" && !event.shiftKey) {
-            event.preventDefault();
-            executeRichCommand("undo");
-            editor.emitChange();
-            editor.syncToggleStates();
-        }
-        if (
-            (hasCommandModifier && pressedKey === "y") ||
-            (hasCommandModifier && event.shiftKey && pressedKey === "z")
-        ) {
-            event.preventDefault();
-            executeRichCommand("redo");
-            editor.emitChange();
-            editor.syncToggleStates();
-        }
     });
 }

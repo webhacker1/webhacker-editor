@@ -1,5 +1,10 @@
 import { createElement } from "../../../../ui/elements.js";
-import { createDropdown, createMenuAction } from "../ui.js";
+import {
+    bindMenuKeyboardNavigation,
+    createDropdown,
+    createMenuAction,
+    focusFirstMenuItem
+} from "../ui.js";
 
 export function createTableDropdown(editor, t) {
     const { dropdownWrapperElement, dropdownMenuElement } = createDropdown(
@@ -27,9 +32,11 @@ export function createTableDropdown(editor, t) {
                 type: "button",
                 "data-row": String(rowIndex),
                 "data-col": String(colIndex),
+                "data-menu-item": "true",
                 "aria-label": `${rowIndex}x${colIndex}`
             });
             cellElement.addEventListener("mouseenter", () => updateHighlight(rowIndex, colIndex));
+            cellElement.addEventListener("focus", () => updateHighlight(rowIndex, colIndex));
             cellElement.addEventListener(
                 "click",
                 createMenuAction(editor, () => editor.insertMinimalTable(rowIndex, colIndex))
@@ -40,5 +47,12 @@ export function createTableDropdown(editor, t) {
 
     tablePickerWrapperElement.append(tablePickerLabelElement, tablePickerGridElement);
     dropdownMenuElement.appendChild(tablePickerWrapperElement);
+
+    bindMenuKeyboardNavigation(editor, dropdownMenuElement, { columnsCount: 10 });
+    dropdownWrapperElement.querySelector(".webhacker-button").addEventListener("click", () => {
+        if (!dropdownMenuElement.classList.contains("webhacker-menu--hidden"))
+            focusFirstMenuItem(dropdownMenuElement);
+    });
+
     return dropdownWrapperElement;
 }

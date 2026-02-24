@@ -46,6 +46,85 @@ export function createDropdown(editor, triggerIconClassName, triggerTitleText) {
     return { dropdownWrapperElement, dropdownMenuElement };
 }
 
+function getInteractiveMenuItems(dropdownMenuElement, itemSelector = '[data-menu-item="true"]') {
+    return [...dropdownMenuElement.querySelectorAll(itemSelector)].filter(itemElement => {
+        if (!itemElement) return false;
+        if (itemElement.disabled) return false;
+        if (itemElement.getAttribute("aria-hidden") === "true") return false;
+        if (itemElement.hasAttribute("hidden")) return false;
+        return true;
+    });
+}
+
+export function focusFirstMenuItem(dropdownMenuElement, itemSelector = '[data-menu-item="true"]') {
+    const [firstItemElement] = getInteractiveMenuItems(dropdownMenuElement, itemSelector);
+    if (firstItemElement) firstItemElement.focus();
+}
+
+export function bindMenuKeyboardNavigation(
+    editor,
+    dropdownMenuElement,
+    { itemSelector = '[data-menu-item="true"]', columnsCount = 1 } = {}
+) {
+    if (!dropdownMenuElement || dropdownMenuElement.dataset.keyboardNavBound === "true") return;
+    dropdownMenuElement.dataset.keyboardNavBound = "true";
+
+    dropdownMenuElement.addEventListener("keydown", event => {
+        if (dropdownMenuElement.classList.contains("webhacker-menu--hidden")) return;
+
+        const menuItems = getInteractiveMenuItems(dropdownMenuElement, itemSelector);
+        if (!menuItems.length) return;
+
+        const resolvedColumnsCount = Math.max(1, Number(columnsCount) || 1);
+        const activeIndex = menuItems.indexOf(document.activeElement);
+
+        const moveFocus = offset => {
+            event.preventDefault();
+            const nextIndex =
+                activeIndex === -1
+                    ? offset < 0
+                        ? menuItems.length - 1
+                        : 0
+                    : (activeIndex + offset + menuItems.length) % menuItems.length;
+            menuItems[nextIndex].focus();
+        };
+
+        if (event.key === "Tab") {
+            moveFocus(event.shiftKey ? -1 : 1);
+            return;
+        }
+        if (event.key === "ArrowRight") {
+            moveFocus(1);
+            return;
+        }
+        if (event.key === "ArrowLeft") {
+            moveFocus(-1);
+            return;
+        }
+        if (event.key === "ArrowDown") {
+            moveFocus(resolvedColumnsCount);
+            return;
+        }
+        if (event.key === "ArrowUp") {
+            moveFocus(-resolvedColumnsCount);
+            return;
+        }
+        if (event.key === "Enter" || event.key === " ") {
+            if (document.activeElement && menuItems.includes(document.activeElement)) {
+                event.preventDefault();
+                document.activeElement.click();
+            }
+            return;
+        }
+        if (event.key === "Escape") {
+            event.preventDefault();
+            editor.closeAllMenus();
+            editor.contentEditableElement.focus();
+            editor.restoreSelectionRange(editor.currentSavedSelectionRange);
+        }
+    });
+}
+
 export function createMenuAction(editor, actionCallback) {
     return event => {
         if (event) {

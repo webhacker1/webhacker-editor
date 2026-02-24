@@ -13,6 +13,9 @@ export function buildToolbar(editor, toolbarElement, t) {
         const groupElement = createElement("div", "webhacker-toolbar__group");
         layoutItem.forEach(controlId => {
             const controlElement = createToolbarControl(controlId, editor, t);
+            if (controlElement && controlElement.setAttribute) {
+                controlElement.setAttribute("data-control-id", controlId);
+            }
             const controlButtonElement =
                 controlElement && controlElement.tagName === "BUTTON"
                     ? controlElement

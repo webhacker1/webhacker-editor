@@ -7,9 +7,29 @@
     color: var(--text-color);
 }
 
+.webhacker-credit {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 4;
+    pointer-events: none;
+    color: var(--muted-color);
+    font-size: 13px;
+    line-height: 1.2;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    text-transform: none;
+}
+
 .webhacker-content {
     min-height: 320px;
-    padding: 18px;
+    padding: 18px 18px 38px;
     outline: none;
     color: var(--text-color);
     position: relative;
@@ -104,5 +124,13 @@
         border-left: 4px solid #cbd5e1;
         border-radius: 8px;
         color: #334155;
+    }
+}
+
+@media (max-width: 900px) {
+    .webhacker-credit {
+        right: 8px;
+        bottom: 8px;
+        font-size: 13px;
     }
 }

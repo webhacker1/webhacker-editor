@@ -9,6 +9,5 @@ export const TOOLBAR_LAYOUT = [
     "separator",
     ["unorderedList", "orderedList", "table"],
     "separator",
-    ["resetStyles"]
+    ["resetStyles", "shortcutsHelp"]
 ];
-

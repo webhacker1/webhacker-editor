@@ -15,6 +15,7 @@ import { createUnorderedListButton } from "./unorderedListButton.js";
 import { createOrderedListButton } from "./orderedListButton.js";
 import { createTableDropdown } from "./tableDropdown.js";
 import { createResetStylesButton } from "./resetStylesButton.js";
+import { createShortcutsHelpDropdown } from "./shortcutsHelpDropdown.js";
 
 const TOOLBAR_BUTTON_REGISTRY = {
     undo: createUndoButton,
@@ -33,7 +34,8 @@ const TOOLBAR_BUTTON_REGISTRY = {
     unorderedList: createUnorderedListButton,
     orderedList: createOrderedListButton,
     table: createTableDropdown,
-    resetStyles: createResetStylesButton
+    resetStyles: createResetStylesButton,
+    shortcutsHelp: createShortcutsHelpDropdown
 };
 
 export function createToolbarControl(controlId, editor, t) {
@@ -41,4 +43,3 @@ export function createToolbarControl(controlId, editor, t) {
     if (!controlFactory) throw new Error(`Unknown toolbar control: ${controlId}`);
     return controlFactory(editor, t);
 }
-

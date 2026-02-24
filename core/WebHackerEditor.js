@@ -61,6 +61,14 @@ WebHackerEditor.prototype.renderEditorInterface = function () {
     );
 
     editorRootElement.append(toolbarElement, contentEditableElement);
+
+    const creditText = typeof t.credit === "string" ? t.credit : "";
+    if (creditText) {
+        const creditElement = createElement("div", "webhacker-credit");
+        creditElement.textContent = creditText;
+        editorRootElement.appendChild(creditElement);
+    }
+
     this.hostContainerElement.appendChild(editorRootElement);
 
     this.editorRootElement = editorRootElement;

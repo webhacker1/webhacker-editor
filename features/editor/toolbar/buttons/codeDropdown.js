@@ -2,7 +2,12 @@ import { createElement } from "../../../../ui/elements.js";
 import { executeRichCommand } from "../../../../core/commands.js";
 import { getSelectionAnchorElement, placeCaretInElement } from "../../selection.js";
 import { escapeHtml } from "../../../../sanitize/utils.js";
-import { createDropdown, createMenuAction } from "../ui.js";
+import {
+    bindMenuKeyboardNavigation,
+    createDropdown,
+    createMenuAction,
+    focusFirstMenuItem
+} from "../ui.js";
 
 function unwrapElementKeepChildren(element) {
     const parentElement = element.parentNode;
@@ -112,7 +117,10 @@ function toggleCodeBlock(editor, language) {
 }
 
 function createSelectMenuItem(editor, labelText, onClickHandler, badgeText = null) {
-    const menuItemElement = createElement("div", "webhacker-menu__item");
+    const menuItemElement = createElement("button", "webhacker-menu__item", {
+        type: "button",
+        "data-menu-item": "true"
+    });
     const labelElement = createElement("span", "webhacker-menu__item-label");
     labelElement.textContent = labelText;
     menuItemElement.appendChild(labelElement);
@@ -150,5 +158,10 @@ export function createCodeDropdown(editor, t) {
     );
 
     dropdownMenuElement.append(inlineCodeItemElement, blockCodeItemElement);
+    bindMenuKeyboardNavigation(editor, dropdownMenuElement, { columnsCount: 1 });
+    dropdownWrapperElement.querySelector(".webhacker-button").addEventListener("click", () => {
+        if (!dropdownMenuElement.classList.contains("webhacker-menu--hidden"))
+            focusFirstMenuItem(dropdownMenuElement);
+    });
     return dropdownWrapperElement;
 }

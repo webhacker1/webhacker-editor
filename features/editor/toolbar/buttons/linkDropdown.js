@@ -1,7 +1,12 @@
 import { createElement } from "../../../../ui/elements.js";
 import { executeRichCommand } from "../../../../core/commands.js";
 import { escapeHtml, ensureSafeUrl } from "../../../../sanitize/utils.js";
-import { createDropdown, createMenuAction } from "../ui.js";
+import {
+    bindMenuKeyboardNavigation,
+    createDropdown,
+    createMenuAction,
+    focusFirstMenuItem
+} from "../ui.js";
 
 export function createLinkDropdown(editor, t) {
     const { dropdownWrapperElement, dropdownMenuElement } = createDropdown(
@@ -12,19 +17,23 @@ export function createLinkDropdown(editor, t) {
     const linkFormElement = createElement("div", "webhacker-form");
     const linkUrlInputElement = createElement("input", "webhacker-input", {
         type: "text",
-        placeholder: t.linkPlaceholder
+        placeholder: t.linkPlaceholder,
+        "data-menu-item": "true"
     });
     const linkTextInputElement = createElement("input", "webhacker-input", {
         type: "text",
-        placeholder: t.linkTextPlaceholder
+        placeholder: t.linkTextPlaceholder,
+        "data-menu-item": "true"
     });
     const linkActionsRowElement = createElement("div", "webhacker-actions");
     const linkConfirmButtonElement = createElement("button", "webhacker-button webhacker-button--primary", {
-        type: "button"
+        type: "button",
+        "data-menu-item": "true"
     });
     linkConfirmButtonElement.textContent = t.ok;
     const linkRemoveButtonElement = createElement("button", "webhacker-button webhacker-button--ghost", {
-        type: "button"
+        type: "button",
+        "data-menu-item": "true"
     });
     linkRemoveButtonElement.textContent = t.remove;
     linkActionsRowElement.append(linkConfirmButtonElement, linkRemoveButtonElement);
@@ -44,7 +53,19 @@ export function createLinkDropdown(editor, t) {
             : selection && !selection.isCollapsed
               ? selection.toString()
               : "";
+
+        if (!dropdownMenuElement.classList.contains("webhacker-menu--hidden"))
+            focusFirstMenuItem(dropdownMenuElement);
     });
+
+    const submitLinkByEnter = event => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        event.stopPropagation();
+        linkConfirmButtonElement.click();
+    };
+    linkUrlInputElement.addEventListener("keydown", submitLinkByEnter);
+    linkTextInputElement.addEventListener("keydown", submitLinkByEnter);
 
     linkConfirmButtonElement.addEventListener(
         "click",
@@ -73,6 +94,8 @@ export function createLinkDropdown(editor, t) {
             linkTextInputElement.value = "";
         })
     );
+
+    bindMenuKeyboardNavigation(editor, dropdownMenuElement, { columnsCount: 1 });
 
     return dropdownWrapperElement;
 }

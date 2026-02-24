@@ -62,3 +62,26 @@ WebHackerEditor.prototype.ensureCaretAnchorInTableCell = function (
         windowSelection.addRange(selectionRange);
     }
 };
+
+WebHackerEditor.prototype.exitTableToNextLine = function (tableCellElement) {
+    const tableElement =
+        tableCellElement && tableCellElement.closest ? tableCellElement.closest("table") : null;
+    if (!tableElement || !tableElement.parentNode) return false;
+
+    const paragraphElement = document.createElement("p");
+    const caretTextNode = document.createTextNode("\u200B");
+    paragraphElement.appendChild(caretTextNode);
+    tableElement.insertAdjacentElement("afterend", paragraphElement);
+
+    const selectionRange = document.createRange();
+    selectionRange.setStart(caretTextNode, caretTextNode.nodeValue.length);
+    selectionRange.collapse(true);
+    const windowSelection = window.getSelection();
+    windowSelection.removeAllRanges();
+    windowSelection.addRange(selectionRange);
+
+    this.emitChange();
+    this.syncToggleStates();
+
+    return true;
+};

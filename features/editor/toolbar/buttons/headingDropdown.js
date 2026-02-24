@@ -1,6 +1,11 @@
 import { createElement } from "../../../../ui/elements.js";
 import { executeRichCommand } from "../../../../core/commands.js";
-import { createDropdown, createMenuAction } from "../ui.js";
+import {
+    bindMenuKeyboardNavigation,
+    createDropdown,
+    createMenuAction,
+    focusFirstMenuItem
+} from "../ui.js";
 
 export function createHeadingDropdown(editor, t) {
     const { dropdownWrapperElement, dropdownMenuElement } = createDropdown(
@@ -16,7 +21,10 @@ export function createHeadingDropdown(editor, t) {
         { label: "H2", tag: "h2" },
         { label: "H3", tag: "h3" }
     ].forEach(({ label, tag }) => {
-        const menuItemElement = createElement("div", "webhacker-menu__item");
+        const menuItemElement = createElement("button", "webhacker-menu__item", {
+            type: "button",
+            "data-menu-item": "true"
+        });
         const labelElement = createElement("span", "webhacker-menu__item-label");
         labelElement.textContent = label;
         menuItemElement.appendChild(labelElement);
@@ -26,6 +34,12 @@ export function createHeadingDropdown(editor, t) {
             createMenuAction(editor, () => executeRichCommand("formatBlock", tag.toUpperCase()))
         );
         dropdownMenuElement.appendChild(menuItemElement);
+    });
+
+    bindMenuKeyboardNavigation(editor, dropdownMenuElement, { columnsCount: 1 });
+    dropdownWrapperElement.querySelector(".webhacker-button").addEventListener("click", () => {
+        if (!dropdownMenuElement.classList.contains("webhacker-menu--hidden"))
+            focusFirstMenuItem(dropdownMenuElement);
     });
 
     return dropdownWrapperElement;
