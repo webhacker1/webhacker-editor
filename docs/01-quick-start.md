@@ -1,11 +1,9 @@
-# Быстрый старт
-
-Быстрый запуск проекта локально: установка, сборка и базовая проверка.
+# Quick Start: запуск проекта за 10-15 минут
 
 ## 1) Что нужно заранее
 
-1. `Node.js` версии 18 или выше.
-2. `npm` версии 9 или выше.
+1. `Node.js` 18+
+2. `npm` 9+
 
 Проверка:
 
@@ -22,15 +20,13 @@ npm install
 
 ## 3) Основные команды
 
-1. Сборка бандла:
+1. Сборка:
 
 ```bash
 npm run build
 ```
 
-Результат: файл `dist/webhacker-editor.bundle.js`.
-
-2. Режим разработки (watch):
+2. Режим разработки:
 
 ```bash
 npm run start
@@ -42,26 +38,60 @@ npm run start
 npm test
 ```
 
-## 4) Что проверить после первого запуска
+## 4) Что должно получиться после сборки
+
+1. появится `dist/webhacker-editor.bundle.js`;
+2. можно подключать бандл на страницу;
+3. редактор создается через `new window.WebHackerEditor.default(...)`.
+
+## 5) Минимальный локальный smoke-check
 
 1. Открой `index.html`.
-2. Убедись, что toolbar виден.
-3. Попробуй:
-   - жирный/курсив;
-   - `Inline code`;
-   - `Code block`;
-   - ссылку;
-   - таблицу.
-4. Перезагрузи страницу и проверь, что контент можно снова подставить через `setHTML`.
+2. Проверь, что toolbar виден.
+3. Проверь `Bold`.
+4. Проверь `Inline code`.
+5. Проверь `Code block`.
+6. Проверь вставку текста через paste.
+7. Проверь таблицу.
+8. Убедись, что `onChange` возвращает HTML.
 
-## 5) Где главные точки входа
+## 6) Пример инициализации с начальными данными
 
-1. Публичный вход библиотеки: `index.js`.
-2. Класс редактора: `core/WebHackerEditor.js`.
-3. Общий файл стилей: `whEditor.less`.
+```js
+const editor = new window.WebHackerEditor.default("#editor", {
+  language: "ru",
+  placeholderText: "Напиши что-нибудь",
+  onChange: (safeHtml) => {
+    console.log("changed", safeHtml);
+  }
+});
 
-## 6) Если нужно встроить в продукт
+editor.setHTML("<p>Привет, команда</p>");
+```
 
-Следующий шаг:
+## 7) Пример view-страницы
 
-1. `docs/08-integration-guide.md`
+```html
+<article id="content" class="webhacker-view-content"></article>
+<script src="/dist/webhacker-editor.bundle.js"></script>
+<script>
+  const rawHtml = "<pre><code class='language-javascript'>const x = 1;</code></pre>";
+  const safeHtml = window.WebHackerEditor.sanitizeHtmlStringToSafeHtml(rawHtml);
+  const content = document.getElementById("content");
+  content.innerHTML = safeHtml;
+  window.WebHackerEditor.highlightCodeBlocksInElement(content);
+</script>
+```
+
+## 8) Если возникли проблемы
+
+1. Проверь версии Node и npm.
+2. Проверь, что используешь актуальный `dist/webhacker-editor.bundle.js`.
+3. Очисти кэш браузера.
+4. Прогони `npm test`.
+
+## 9) Что читать дальше
+
+1. [02-architecture.md](./02-architecture.md)
+2. [03-toolbar.md](./03-toolbar.md)
+3. [04-security.md](./04-security.md)

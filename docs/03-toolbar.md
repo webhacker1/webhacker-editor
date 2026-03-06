@@ -1,35 +1,28 @@
-# Toolbar: как устроен и как расширять
+# Toolbar: устройство и расширение
 
-## 1) Из чего состоит toolbar
+Этот раздел отвечает на вопрос "как добавить или поменять кнопку".
 
-1. `features/editor/toolbar/layout.js`  
-Порядок кнопок и групп.
+## 1) Как устроен toolbar
 
-2. `features/editor/toolbar/buildToolbar.js`  
-Сборка toolbar по layout.
+1. `layout.js` задает порядок групп и кнопок;
+2. `buildToolbar.js` строит DOM по layout;
+3. `buttons/registry.js` связывает `controlId` с фабрикой кнопки;
+4. `buttons/*.js` реализуют конкретные действия;
+5. `ui.js` содержит общие хелперы кнопок и dropdown.
 
-3. `features/editor/toolbar/buttons/registry.js`  
-Связка `id кнопки` -> `фабрика кнопки`.
+## 2) Поток при клике на кнопку
 
-4. `features/editor/toolbar/buttons/*.js`  
-Реализация каждой кнопки.
+1. пользователь кликает кнопку;
+2. `createToolbarButton` делает `focus` в редактор;
+3. выполняется команда (`execCommand` или кастомная логика);
+4. вызываются `emitChange()` и `syncToggleStates()`;
+5. при необходимости запускается подсветка code block.
 
-5. `features/editor/toolbar/ui.js`  
-Общие UI-хелперы для кнопок и dropdown.
+## 3) Реальный пример: добавить кнопку `strikeThrough`
 
-## 2) Как toolbar строится во время запуска
+### Шаг 1. Создай кнопку
 
-1. `WebHackerEditor` создает root.
-2. Вызывает `buildToolbar(...)`.
-3. `buildToolbar` читает `TOOLBAR_LAYOUT`.
-4. Для каждого `controlId` registry создает кнопку.
-5. Кнопки вставляются в toolbar.
-
-## 3) Добавляем новую кнопку (шаг за шагом)
-
-Пример: кнопка `strikeThrough`.
-
-1. Создай файл `features/editor/toolbar/buttons/strikeButton.js`.
+Файл: `features/editor/toolbar/buttons/strikeButton.js`
 
 ```js
 import { createCommandButton } from "./createCommandButton.js";
@@ -43,32 +36,48 @@ export function createStrikeButton(editor, t) {
 }
 ```
 
-2. Подключи кнопку в `registry.js`.
-3. Добавь `controlId` в `layout.js`.
-4. Добавь переводы в `translations/ru.yml` и `translations/en.yml`.
-5. Прогони тесты и сборку.
+### Шаг 2. Зарегистрируй кнопку
+
+В `buttons/registry.js`:
+1. импортируй `createStrikeButton`;
+2. добавь ключ `strike: createStrikeButton`.
+
+### Шаг 3. Добавь кнопку в layout
+
+В `toolbar/layout.js` добавь `strike` в нужную группу.
+
+### Шаг 4. Добавь переводы
+
+В `translations/ru.yml` и `translations/en.yml` добавь `strike`.
+
+### Шаг 5. Добавь тест
+
+Проверь, что кнопка:
+1. рендерится;
+2. вызывает действие;
+3. не ломает существующие кнопки.
 
 ## 4) Когда делать обычную кнопку, а когда dropdown
 
-1. Обычная кнопка (`createCommandButton`)  
-Когда действие простое и делается сразу (bold, italic, undo).
+1. обычная кнопка - одно действие сразу (`bold`, `italic`);
+2. dropdown - когда есть выбор (`code`, `heading`, `color`, `table`).
 
-2. Dropdown  
-Когда нужно меню с выбором (heading, color, code language).
+## 5) Почему иногда кнопка не работает
 
-## 5) Частые ошибки
+1. есть файл кнопки, но нет записи в `registry.js`;
+2. есть запись в `registry.js`, но нет `controlId` в `layout.js`;
+3. тексты не добавлены в переводы;
+4. кнопка отключается `syncToggleStates()` в активном code block/table.
 
-1. Теряется выделение в dropdown.
-Решение: на `mousedown` внутри меню делать `preventDefault`.
+## 6) Реальный чеклист перед PR по toolbar
 
-2. Кнопка есть в коде, но не видна.
-Решение: проверить и `registry.js`, и `layout.js`.
+1. кнопка появилась в UI;
+2. есть переводы RU и EN;
+3. состояние disabled/pressed корректно;
+4. горячие клавиши не конфликтуют;
+5. `npm test` и `npm run build` проходят.
 
-3. Кнопка не переводится.
-Решение: добавить ключ в оба файла переводов.
+## 7) Что читать дальше
 
-## 6) Что дальше
-
-Следующий файл:
-
-1. `docs/04-security.md`
+1. [05-testing.md](./05-testing.md)
+2. [06-recipes.md](./06-recipes.md)

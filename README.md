@@ -13,6 +13,14 @@
   <img src="https://img.shields.io/badge/highlight.js-code-A07CFF?style=flat-square" alt="highlight.js">
 </p>
 
+## Что это
+
+`WebHackerEditor` - библиотека rich-text редактора с:
+1. toolbar;
+2. code block + highlight.js;
+3. table support;
+4. sanitize для безопасного HTML.
+
 ## Установка
 
 ```bash
@@ -28,14 +36,11 @@ npm test
 
 ## Документация
 
-1. `docs/01-quick-start.md`
-2. `docs/08-integration-guide.md`
-3. `docs/07-integration-contract.md`
-4. `docs/02-architecture.md`
-5. `docs/03-toolbar.md`
-6. `docs/04-security.md`
-7. `docs/05-testing.md`
-8. `docs/06-recipes.md`
+1. [docs/README.md](./docs/README.md) - единая карта всей документации
+2. [docs/00-start-here.md](./docs/00-start-here.md) - вход в проект простыми словами
+3. [docs/09-visual-maps.md](./docs/09-visual-maps.md) - диаграммы и визуальная карта
+4. [docs/08-integration-guide.md](./docs/08-integration-guide.md) - пошаговая интеграция
+5. [docs/07-integration-contract.md](./docs/07-integration-contract.md) - контракт интеграции
 
 ## Бандл
 
