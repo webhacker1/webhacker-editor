@@ -137,6 +137,16 @@ export function bindKeyboardEvents(editor) {
             editor.exitCodeBlockToNextLine(activeCodeElement);
             return;
         }
+        
+        if (event.key === "Enter" && activeCodeElement && !hasCommandModifier) {
+            event.preventDefault();
+            executeRichCommand("insertLineBreak");
+            requestAnimationFrame(() => {
+                editor.highlightCodeAtCaret();
+                editor.emitChange();
+            });
+            return;
+        }
 
         if (event.key === "Enter" && inlineCodeElement) {
             event.preventDefault();

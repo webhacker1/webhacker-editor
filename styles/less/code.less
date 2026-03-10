@@ -20,7 +20,11 @@
         border-radius: 10px;
         overflow: visible;
         position: relative;
-
+        z-index: 0;
+        
+        &:has(.webhacker-code-language__menu:not(.webhacker-code-language__menu--hidden)) { 
+            z-index: 5; 
+        }
         code {
             background: transparent;
             border: 0;
