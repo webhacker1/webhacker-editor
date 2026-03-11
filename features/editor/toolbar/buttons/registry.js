@@ -5,6 +5,7 @@ import { createItalicButton } from "./italicButton.js";
 import { createUnderlineButton } from "./underlineButton.js";
 import { createCodeDropdown } from "./codeDropdown.js";
 import { createColorDropdown } from "./colorDropdown.js";
+import { createMathDropdown } from "./mathDropdown.js";
 import { createLinkDropdown } from "./linkDropdown.js";
 import { createImageDisabledButton } from "./imageDisabledButton.js";
 import { createHeadingDropdown } from "./headingDropdown.js";
@@ -24,6 +25,7 @@ const TOOLBAR_BUTTON_REGISTRY = {
     italic: createItalicButton,
     underline: createUnderlineButton,
     code: createCodeDropdown,
+    math: createMathDropdown,
     color: createColorDropdown,
     link: createLinkDropdown,
     imageDisabled: createImageDisabledButton,

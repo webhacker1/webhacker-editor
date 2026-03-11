@@ -108,7 +108,29 @@
 3. после `innerHTML` вызывается `highlightCodeBlocksInElement`;
 4. подключен актуальный `dist/webhacker-editor.bundle.js`.
 
-## 8) Что читать дальше
+## 8) Нужно поменять поведение блока формулы
+
+Куда идти:
+1. `features/editor/toolbar/buttons/mathDropdown.js`
+2. `features/math/editorBindings.js`
+3. `features/math/engine.js`
+4. `styles/less/math.less`
+5. `translations/ru.yml`
+6. `translations/en.yml`
+
+Что сделать:
+1. тексты меню менять в `translations/*.yml` (`math.*`);
+2. ссылку на правила менять в `MATH_DOCS_URL` в `mathDropdown.js`;
+3. вставку/обновление/выход менять в `editorBindings.js`;
+4. мобильное позиционирование меню менять в `.webhacker-menu--math` в `math.less`.
+
+Что проверить:
+1. формула вставляется как блочный элемент;
+2. в меню работает кнопка `Отмена/Cancel`;
+3. меню на телефонах остается в пределах экрана;
+4. сериализация не содержит runtime-элементов (`preview/actions`).
+
+## 9) Что читать дальше
 
 1. [09-visual-maps.md](./09-visual-maps.md)
 2. [08-integration-guide.md](./08-integration-guide.md)

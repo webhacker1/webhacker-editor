@@ -5,6 +5,7 @@ import { createDropdown } from "../ui.js";
 function getActionLabel(shortcutAction, t) {
     if (shortcutAction.id === "fontSize") return t.shortcuts.fontSize;
     if (shortcutAction.id === "code") return t.code.label;
+    if (shortcutAction.id === "math") return (t.math && t.math.label);
     if (shortcutAction.id === "resetStyles") return t.reset_styles;
     if (shortcutAction.id === "shortcutsHelp") return t.shortcuts.title;
     return t[shortcutAction.id];

@@ -1,7 +1,7 @@
 export const TOOLBAR_LAYOUT = [
     ["undo", "redo"],
     "separator",
-    ["bold", "italic", "underline", "code", "color", "link", "imageDisabled"],
+    ["bold", "italic", "underline", "code", "math", "color", "link", "imageDisabled"],
     "separator",
     ["heading"],
     "separator",

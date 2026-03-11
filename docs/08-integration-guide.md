@@ -68,6 +68,10 @@ editor.setHTML(initialHtml);
 editor.setTheme({
   backgroundColor: "#0f172a",
   textColor: "#e2e8f0",
+  secondaryColor: "#1e293b",
+  borderColor: "#334155",
+  mutedColor: "#94a3b8",
+  accentColor: "#60a5fa",
   codeInlineBackground: "#334155",
   codeInlineBorder: "#475569",
   codeInlineText: "#e2e8f0"

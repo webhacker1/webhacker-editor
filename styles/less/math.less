@@ -1,0 +1,266 @@
+.webhacker-menu--math {
+    width: min(92vw, 480px);
+    max-width: calc(100vw - 16px);
+    max-height: min(86vh, 640px);
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.webhacker-math-form {
+    display: grid;
+    gap: 10px;
+
+    &__label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted-color);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    &__meta {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: nowrap;
+    }
+
+    &__label--inline {
+        margin: 0;
+    }
+
+    &__input {
+        min-height: 128px;
+        width: 100%;
+        max-width: 100%;
+        font: inherit;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    &__docs {
+        flex-shrink: 0;
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent-color);
+        text-decoration: none;
+        border-bottom: 1px dashed rgba(37, 99, 235, 0.35);
+        line-height: 1.2;
+
+        &:hover {
+            border-bottom-color: currentColor;
+        }
+    }
+
+    &__preview {
+        min-height: 92px;
+        max-height: 210px;
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: auto;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--background-color);
+        color: var(--text-color);
+        padding: 12px;
+        text-align: center;
+        scrollbar-width: thin;
+    }
+
+    &__preview:empty::before {
+        display: block;
+        content: attr(data-placeholder);
+        color: var(--muted-color);
+        font-size: 13px;
+        text-align: center;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+}
+
+.webhacker-content,
+.webhacker-view-content {
+    figure.webhacker-math {
+        margin: 1em 0;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: var(--secondary-color, var(--background-color));
+        position: relative;
+    }
+
+    code.webhacker-math__source {
+        display: none;
+    }
+
+    .webhacker-math__preview {
+        min-height: 56px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--background-color);
+        color: var(--text-color);
+        padding: 8px 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        text-align: center;
+
+        .webhacker-math__status {
+            color: var(--muted-color);
+            font-size: 13px;
+        }
+
+        math {
+            display: inline-block;
+            max-width: 100%;
+            font-size: 1.03em;
+        }
+    }
+}
+
+.webhacker-content {
+    .webhacker-math__actions {
+        margin-top: 8px;
+        display: flex;
+        gap: 6px;
+        justify-content: flex-end;
+    }
+
+    .webhacker-math__button {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: var(--background-color);
+        color: var(--text-color);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+
+        &:hover {
+            background: var(--secondary-color, var(--background-color));
+            border-color: var(--accent-color);
+        }
+
+        &:focus-visible {
+            outline: 0;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
+        }
+
+        &--edit:hover,
+        &--edit:focus-visible {
+            background: rgba(37, 99, 235, 0.16);
+            border-color: rgba(37, 99, 235, 0.48);
+            color: #1d4ed8;
+        }
+
+        &--exit:hover,
+        &--exit:focus-visible {
+            background: rgba(5, 150, 105, 0.18);
+            border-color: rgba(5, 150, 105, 0.5);
+            color: #047857;
+        }
+
+        &--delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.48);
+            color: #b91c1c;
+        }
+
+        &--delete:focus-visible {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.48);
+            color: #b91c1c;
+        }
+    }
+
+    .webhacker-math__button[data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        right: 0;
+        top: calc(100% + 6px);
+        background: var(--tooltip-bg);
+        color: var(--white);
+        padding: 4px 6px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+        z-index: 6;
+    }
+
+    .webhacker-math__button[data-tooltip]:hover::after,
+    .webhacker-math__button[data-tooltip]:focus-visible::after {
+        opacity: 1;
+    }
+}
+
+.webhacker-view-content {
+    figure.webhacker-math {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .webhacker-math__preview {
+        min-height: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        padding: 0;
+    }
+}
+
+@media (max-width: 760px) {
+    .webhacker-menu--math {
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        max-height: min(80vh, 560px);
+    }
+
+    .webhacker-math-form {
+        &__input {
+            min-height: 116px;
+        }
+
+        &__preview {
+            min-height: 84px;
+            max-height: 180px;
+            padding: 10px;
+        }
+
+        &__meta {
+            flex-wrap: wrap;
+            gap: 6px 10px;
+        }
+
+        &__docs {
+            font-size: 14px;
+        }
+    }
+}
+
+@media (max-width: 900px) {
+    .webhacker-menu--math {
+        position: fixed !important;
+        left: 50% !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%);
+        width: min(94vw, 560px);
+        max-width: calc(100vw - 16px);
+        max-height: min(84vh, 640px);
+        margin: 0;
+        z-index: 90;
+    }
+}

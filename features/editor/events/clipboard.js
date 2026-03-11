@@ -1,5 +1,6 @@
 import { escapeHtml } from "../../../sanitize/utils.js";
 import { getSelectionAnchorElement } from "./utils.js";
+import { stripMathRuntimeUi } from "../../math/engine.js";
 
 function extractPlainTextFromClipboard(htmlData, textData) {
     if (typeof textData === "string" && textData.length) return textData;
@@ -58,6 +59,7 @@ export function bindClipboardEvents(editor) {
         containerElement.querySelectorAll(".webhacker-code-language").forEach(element => {
             element.remove();
         });
+        stripMathRuntimeUi(containerElement);
         const htmlValue = containerElement.innerHTML;
         const textValue = containerElement.textContent ?? "";
 

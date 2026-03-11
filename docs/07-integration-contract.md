@@ -54,7 +54,10 @@ const editor = new window.WebHackerEditor.default("#editor", {
 1. `--background-color`
 2. `--text-color`
 3. `--secondary-color`
-4. `--border-color2`
+4. `--border-color`
+5. `--border-color2`
+6. `--accent-color`
+7. `--muted-color`
 
 ## 5) Контракт view-режима
 

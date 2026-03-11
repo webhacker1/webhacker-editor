@@ -59,9 +59,10 @@ Feature-модули добавляют методы в `WebHackerEditor.prototy
 2. Обработка клавиш: `features/editor/events/keyboard.js`
 3. Вставка из буфера: `features/editor/events/clipboard.js`
 4. Code block: `features/code/*`
-5. Таблицы: `features/table/editorBindings.js`
-6. Безопасность HTML: `sanitize/*`
-7. Темизация: `ui/theme.js`, `styles/less/*`
+5. Formula block (LaTeX): `features/math/*`, `features/editor/toolbar/buttons/mathDropdown.js`
+6. Таблицы: `features/table/editorBindings.js`
+7. Безопасность HTML: `sanitize/*`
+8. Темизация: `ui/theme.js`, `styles/less/*`
 
 ## 7) Практический пример: "нужно добавить новую кнопку"
 

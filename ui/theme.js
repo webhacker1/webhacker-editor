@@ -5,6 +5,14 @@ export function applyThemeVariables(editorRootElement, themeOptions) {
         editorRootElement.style.setProperty("--background-color", themeOptions.backgroundColor);
     if (themeOptions.textColor)
         editorRootElement.style.setProperty("--text-color", themeOptions.textColor);
+    if (themeOptions.secondaryColor)
+        editorRootElement.style.setProperty("--secondary-color", themeOptions.secondaryColor);
+    if (themeOptions.borderColor)
+        editorRootElement.style.setProperty("--border-color", themeOptions.borderColor);
+    if (themeOptions.mutedColor)
+        editorRootElement.style.setProperty("--muted-color", themeOptions.mutedColor);
+    if (themeOptions.accentColor)
+        editorRootElement.style.setProperty("--accent-color", themeOptions.accentColor);
     if (themeOptions.codeInlineBackground)
         editorRootElement.style.setProperty("--code-inline-bg", themeOptions.codeInlineBackground);
     if (themeOptions.codeInlineBorder)

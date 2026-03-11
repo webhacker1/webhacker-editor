@@ -35,6 +35,18 @@ vi.mock("../translations/en.yml", () => ({
                 ruby: "Ruby"
             }
         },
+        math: {
+            label: "Formula",
+            inputLabel: "Enter formula",
+            placeholder: "\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}",
+            preview: "Preview",
+            docs: "Formula rules",
+            insert: "Insert",
+            update: "Update",
+            editBlock: "Edit formula",
+            deleteBlock: "Delete formula",
+            exitBlock: "Exit formula block"
+        },
         reset_styles: "Reset styles",
         link: "Link",
         image: "Image",
@@ -48,6 +60,7 @@ vi.mock("../translations/en.yml", () => ({
         beta: "BETA",
         soon: "Soon",
         remove: "Remove",
+        cancel: "Cancel",
         ok: "OK",
         paragraph: "Paragraph",
         linkPlaceholder: "https://example.com",
@@ -102,6 +115,18 @@ vi.mock("../translations/ru.yml", () => ({
                 ruby: "Ruby"
             }
         },
+        math: {
+            label: "Formula",
+            inputLabel: "Enter formula",
+            placeholder: "\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}",
+            preview: "Preview",
+            docs: "Formula rules",
+            insert: "Insert",
+            update: "Update",
+            editBlock: "Edit formula",
+            deleteBlock: "Delete formula",
+            exitBlock: "Exit formula block"
+        },
         reset_styles: "Reset styles",
         link: "Link",
         image: "Image",
@@ -115,6 +140,7 @@ vi.mock("../translations/ru.yml", () => ({
         beta: "BETA",
         soon: "Soon",
         remove: "Remove",
+        cancel: "Cancel",
         ok: "OK",
         paragraph: "Paragraph",
         linkPlaceholder: "https://example.com",
@@ -136,6 +162,7 @@ vi.mock("../translations/ru.yml", () => ({
 
 import WebHackerEditor from "../core/WebHackerEditor.js";
 import "../features/code/index.js";
+import "../features/math/index.js";
 import "../features/table/editorBindings.js";
 import "../features/editor/events/index.js";
 
@@ -268,6 +295,39 @@ describe("toolbar buttons", () => {
         expect(editor.contentEditableElement.querySelector("code")).not.toBeNull();
     });
 
+    it("handles math dropdown actions and keeps serialization clean", () => {
+        placeCaretInEditor(editor);
+        click(getToolbarButtonByLabel(editor, "Formula"));
+
+        const mathInputElement = editor.toolbarElement.querySelector(".webhacker-math-form__input");
+        const mathCancelButtonElement = [...editor.toolbarElement.querySelectorAll(".webhacker-button")].find(
+            buttonElement => buttonElement.textContent.trim() === "Cancel"
+        );
+        const mathInsertButtonElement = [...editor.toolbarElement.querySelectorAll(".webhacker-button")].find(
+            buttonElement => buttonElement.textContent.trim() === "Insert"
+        );
+
+        mathInputElement.value = "\\\\alpha + \\\\beta";
+        mathInputElement.dispatchEvent(new Event("input", { bubbles: true }));
+        click(mathCancelButtonElement);
+        expect(getControlMenu(editor, "math").classList.contains("webhacker-menu--hidden")).toBe(true);
+        expect(editor.contentEditableElement.querySelector("figure code.language-math")).toBeNull();
+
+        click(getToolbarButtonByLabel(editor, "Formula"));
+        mathInputElement.value = "\\\\frac{-b \\\\pm \\\\sqrt{b^2-4ac}}{2a}";
+        mathInputElement.dispatchEvent(new Event("input", { bubbles: true }));
+        click(mathInsertButtonElement);
+
+        const mathCodeElement = editor.contentEditableElement.querySelector("figure code.language-math");
+        expect(mathCodeElement).not.toBeNull();
+        expect(editor.contentEditableElement.querySelector(".webhacker-math__preview")).not.toBeNull();
+
+        const serializedHtml = editor.getHTML();
+        expect(serializedHtml).toContain('<code class="language-math">');
+        expect(serializedHtml).not.toContain("webhacker-math__preview");
+        expect(serializedHtml).not.toContain("webhacker-math__actions");
+    });
+
     it("handles heading dropdown actions", () => {
         click(getToolbarButtonByLabel(editor, "Headings"));
         click(getMenuItemByText(editor, "H2"));
@@ -329,11 +389,16 @@ describe("toolbar buttons", () => {
         expect(editor.contentEditableElement.querySelector("table.wh-table")).not.toBeNull();
     });
 
-    it("opens color, headings and table menus with keyboard shortcuts", () => {
+    it("opens color, math, headings and table menus with keyboard shortcuts", () => {
         placeCaretInEditor(editor);
 
         pressEditorKey(editor, { key: "c", code: "KeyC", ctrlKey: true, altKey: true });
         expect(getControlMenu(editor, "color").classList.contains("webhacker-menu--hidden")).toBe(false);
+
+        editor.closeAllMenus();
+
+        pressEditorKey(editor, { key: "m", code: "KeyM", ctrlKey: true, altKey: true });
+        expect(getControlMenu(editor, "math").classList.contains("webhacker-menu--hidden")).toBe(false);
 
         editor.closeAllMenus();
 

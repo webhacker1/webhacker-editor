@@ -48,6 +48,12 @@ export const SHORTCUT_ACTIONS = [
         shortcuts: [shortcut("KeyC", { alt: true })]
     },
     {
+        id: "math",
+        type: "control",
+        controlId: "math",
+        shortcuts: [shortcut("KeyM", { alt: true })]
+    },
+    {
         id: "link",
         type: "control",
         controlId: "link",

@@ -84,10 +84,16 @@ WebHackerEditor.prototype.toggleMenu = function (dropdownMenuElement) {
     dropdownMenuElement.style.right = 'unset';
 
     if (!dropdownMenuElement.classList.contains("webhacker-menu--hidden")) {
-        setTimeout(() => {            
-            if (dropdownMenuElement.getBoundingClientRect().right > this.editorRootElement.getBoundingClientRect().right) {
+        setTimeout(() => {
+            const menuRect = dropdownMenuElement.getBoundingClientRect();
+            const editorRect = this.editorRootElement.getBoundingClientRect();
+            if (menuRect.right > editorRect.right) {
                 dropdownMenuElement.style.left = 'unset';
                 dropdownMenuElement.style.right = '0';
+            }
+            if (dropdownMenuElement.getBoundingClientRect().left < editorRect.left) {
+                dropdownMenuElement.style.left = '0';
+                dropdownMenuElement.style.right = 'unset';
             }
         }, 0);
     }
@@ -136,6 +142,7 @@ WebHackerEditor.prototype.syncToggleStates = function () {
     const activeCodeElement = anchorNode && anchorNode.closest ? anchorNode.closest("pre code") : null;
     const blockedInCodeBlock = new Set([
         "code",
+        "math",
         "imageDisabled",
         "bold",
         "italic",
@@ -154,6 +161,7 @@ WebHackerEditor.prototype.syncToggleStates = function () {
     const activeTable = anchorNode && anchorNode.closest ? anchorNode.closest("table") : null;
     const blockedInTable = new Set([
         "code",
+        "math",
         "table"
     ]);
 

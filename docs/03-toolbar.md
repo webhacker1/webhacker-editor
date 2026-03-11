@@ -60,16 +60,31 @@ export function createStrikeButton(editor, t) {
 ## 4) Когда делать обычную кнопку, а когда dropdown
 
 1. обычная кнопка - одно действие сразу (`bold`, `italic`);
-2. dropdown - когда есть выбор (`code`, `heading`, `color`, `table`).
+2. dropdown - когда есть выбор (`code`, `math`, `heading`, `color`, `table`).
 
-## 5) Почему иногда кнопка не работает
+## 5) Math dropdown (формулы)
+
+Куда идти:
+1. `features/editor/toolbar/buttons/mathDropdown.js`
+2. `features/math/editorBindings.js`
+3. `styles/less/math.less`
+4. `translations/ru.yml`
+5. `translations/en.yml`
+
+Что важно:
+1. тексты кнопки/лейблов берутся из `t.math`;
+2. ссылка на правила формул хранится одной константой в `mathDropdown.js`;
+3. действия меню: `Вставить/Insert`, `Обновить/Update`, `Отмена/Cancel`;
+4. на мобильных позиционирование окна задается в `styles/less/math.less` (`.webhacker-menu--math`).
+
+## 6) Почему иногда кнопка не работает
 
 1. есть файл кнопки, но нет записи в `registry.js`;
 2. есть запись в `registry.js`, но нет `controlId` в `layout.js`;
 3. тексты не добавлены в переводы;
 4. кнопка отключается `syncToggleStates()` в активном code block/table.
 
-## 6) Реальный чеклист перед PR по toolbar
+## 7) Реальный чеклист перед PR по toolbar
 
 1. кнопка появилась в UI;
 2. есть переводы RU и EN;
@@ -77,7 +92,7 @@ export function createStrikeButton(editor, t) {
 4. горячие клавиши не конфликтуют;
 5. `npm test` и `npm run build` проходят.
 
-## 7) Что читать дальше
+## 8) Что читать дальше
 
 1. [05-testing.md](./05-testing.md)
 2. [06-recipes.md](./06-recipes.md)
