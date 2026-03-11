@@ -64,25 +64,19 @@ function toggleInlineCode(editor) {
 
 function toggleCodeBlock(editor, language) {
     const anchorElement = getSelectionAnchorElement();
-    const nearestPreElement = anchorElement && anchorElement.closest ? anchorElement.closest("pre") : null;
-    const nearestInlineCodeElement = anchorElement && anchorElement.closest ? anchorElement.closest("code") : null;
+    const nearestPreElement = anchorElement?.closest("pre") ?? null;
+    const nearestInlineCodeElement = anchorElement?.closest("code") ?? null;
     const normalizedLanguage = language ?? "plaintext";
+    const contentEditable = editor.contentEditableElement;
 
     if (nearestPreElement) {
         const codeElement = nearestPreElement.querySelector("code");
-        const plainText = (
-            codeElement
-                ? codeElement.innerText ?? codeElement.textContent ?? ""
-                : nearestPreElement.innerText ?? nearestPreElement.textContent ?? ""
-        ).replace(/\u200B/g, "");
+        const plainText = (codeElement?.innerText ?? codeElement?.textContent ?? nearestPreElement.innerText ?? "").replace(/\u200B/g, "");
         replacePreWithPlainText(nearestPreElement, plainText);
         return;
     }
 
-    if (
-        nearestInlineCodeElement &&
-        (!nearestInlineCodeElement.closest || !nearestInlineCodeElement.closest("pre"))
-    ) {
+    if (nearestInlineCodeElement && !nearestInlineCodeElement.closest("pre")) {
         const preElement = document.createElement("pre");
         const codeElement = document.createElement("code");
         codeElement.className = `language-${normalizedLanguage}`;
@@ -99,21 +93,34 @@ function toggleCodeBlock(editor, language) {
     const preElement = document.createElement("pre");
     const codeElement = document.createElement("code");
     codeElement.className = `language-${normalizedLanguage}`;
-    codeElement.textContent =
-        selection && selection.rangeCount > 0 && selection.toString() ? selection.toString() : "\u200B";
+    codeElement.textContent = (selection?.rangeCount > 0 && selection.toString()) ? selection.toString() : "\u200B";
     preElement.appendChild(codeElement);
 
-    if (!selection || selection.rangeCount === 0) {
-        editor.contentEditableElement.appendChild(preElement);
+    let anchorNode = selection?.anchorNode ?? null;
+    let directChild = null;
+    while (anchorNode && anchorNode.parentElement !== contentEditable) {
+        anchorNode = anchorNode.parentElement;
+    }
+    if (anchorNode && contentEditable.contains(anchorNode)) {
+        directChild = anchorNode;
+    }
+
+    if (directChild) {
+        if (selection?.rangeCount > 0) selection.getRangeAt(0).deleteContents();
+        const isEmpty = directChild.textContent.trim() === "" && !directChild.querySelector?.("img, br");
+        if (isEmpty) {
+            directChild.replaceWith(preElement);
+        } else {
+            directChild.after(preElement);
+        }
     } else {
-        const range = selection.getRangeAt(0);
-        range.deleteContents();
-        range.insertNode(preElement);
+        contentEditable.appendChild(preElement);
     }
 
     placeCaretInElement(codeElement);
     editor.highlightCodeElement(codeElement);
     editor.ensureCodeLanguageBadge(preElement);
+    editor.emitChange();
 }
 
 function createSelectMenuItem(editor, labelText, onClickHandler, badgeText = null) {

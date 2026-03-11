@@ -2,6 +2,7 @@ import { createElement } from "../ui/elements.js";
 import { sanitizeHtmlStringToSafeHtml } from "../sanitize/sanitize.js";
 import { applyThemeVariables } from "../ui/theme.js";
 import { buildToolbar } from "../features/editor/toolbar/buildToolbar.js";
+import { collectNodesInRange } from './selection.js';
 import ru from "../translations/ru.yml";
 import en from "../translations/en.yml";
 
@@ -120,7 +121,25 @@ WebHackerEditor.prototype.emitChange = function () {
 };
 
 WebHackerEditor.prototype.syncToggleStates = function () {
-    const readCommandState = commandName => String(document.queryCommandState(commandName));
+    const readCommandState = commandName => {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+            return String(document.queryCommandState(commandName));
+        }
+        
+        const range = selection.getRangeAt(0);
+        const fragment = range.cloneContents();
+        if (!fragment.querySelector("pre") && !fragment.querySelector(".webhacker-math")) {
+            return String(document.queryCommandState(commandName));
+        }
+
+        const { preNodes } = collectNodesInRange(range);
+        preNodes.forEach(pre => pre.setAttribute("contenteditable", "false"));
+        const state = String(document.queryCommandState(commandName));
+        preNodes.forEach(pre => pre.removeAttribute("contenteditable"));
+        return state;
+    };
+
     const updateToggleButton = (key, value) => {
         if (this.trackedToggleButtonsMap[key])
             this.trackedToggleButtonsMap[key].setAttribute("aria-pressed", value);

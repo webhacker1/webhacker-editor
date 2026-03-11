@@ -27,14 +27,9 @@ function createCodeDeleteButton(editorInstance, preElement, t) {
     deleteButtonElement.addEventListener("click", event => {
         event.preventDefault();
         event.stopPropagation();
-        editorInstance.contentEditableElement.focus();
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNode(preElement);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        executeRichCommand("delete");
-        if (editorInstance.contentEditableElement.contains(preElement)) preElement.remove();
+
+        preElement.remove();
+
         editorInstance.emitChange();
         editorInstance.syncToggleStates();
         editorInstance.highlightCodeBlocks();
@@ -65,14 +60,20 @@ function createCodeExitButton(editorInstance, codeElement, t) {
 }
 
 function moveCaretAfterCodeBlock(preElement) {
-    const paragraphElement = document.createElement("p");
-    const anchorTextNode = document.createTextNode("\u200B");
-    paragraphElement.appendChild(anchorTextNode);
-    preElement.insertAdjacentElement("afterend", paragraphElement);
-
+    const nextElement = preElement.nextElementSibling;
     const selection = window.getSelection();
     const range = document.createRange();
-    range.setStart(anchorTextNode, 1);
+
+    if (nextElement && !nextElement.matches("pre")) {
+        if (!nextElement.firstChild) nextElement.appendChild(document.createTextNode(""));
+        range.setStart(nextElement.firstChild ?? nextElement, 0);
+    } else {
+        const p = document.createElement("p");
+        p.innerHTML = "<br>";
+        preElement.insertAdjacentElement("afterend", p);
+        range.setStart(p, 0);
+    }
+
     range.collapse(true);
     selection.removeAllRanges();
     selection.addRange(range);
@@ -182,7 +183,13 @@ WebHackerEditor.prototype.ensureCodeLanguageBadge = function (preElement) {
         triggerButtonElement.addEventListener("click", event => {
             event.preventDefault();
             event.stopPropagation();
-            menuElement.classList.toggle("webhacker-code-language__menu--hidden");
+            const shouldOpen = menuElement.classList.contains('webhacker-code-language__menu--hidden');
+            document.querySelectorAll('.webhacker-code-language__menu').forEach(menu => {
+                menu.classList.add('webhacker-code-language__menu--hidden');
+            });
+            if (shouldOpen) {
+                menuElement.classList.remove('webhacker-code-language__menu--hidden');
+            }
         });
 
         document.addEventListener("mousedown", event => {
