@@ -1,2 +1,7 @@
 node_modules/
 *.log
+dist/*.woff
+dist/*.woff2
+dist/*.ttf
+dist/*.otf
+dist/*.eot

@@ -71,6 +71,10 @@
         padding: 12px;
         text-align: center;
         scrollbar-width: thin;
+
+        .katex-display {
+            margin: 0;
+        }
     }
 
     &__preview:empty::before {
@@ -115,10 +119,8 @@
             font-size: 13px;
         }
 
-        math {
-            display: inline-block;
-            max-width: 100%;
-            font-size: 1.03em;
+        .katex-display {
+            margin: 0;
         }
     }
 }

@@ -13,6 +13,10 @@ export default {
     module: {
         rules: [
             {
+                test: /\.(woff2?|ttf|otf|eot)$/i,
+                type: "asset/inline"
+            },
+            {
                 test: /\.yml$/,
                 use: "yaml-loader"
             },

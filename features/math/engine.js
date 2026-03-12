@@ -39,7 +39,7 @@ export function renderMathLatexToHtml(latexValue) {
     try {
         return katex.renderToString(normalizedLatexValue, {
             displayMode: true,
-            output: "mathml",
+            output: "htmlAndMathml",
             throwOnError: false,
             strict: "ignore"
         });
