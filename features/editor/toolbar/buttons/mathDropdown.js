@@ -116,7 +116,11 @@ export function createMathDropdown(editor, t) {
 
     const closeComposer = () => {
         editor.closeAllMenus();
-        editor.contentEditableElement.focus();
+        try {
+            editor.contentEditableElement.focus({ preventScroll: true });
+        } catch {
+            editor.contentEditableElement.focus();
+        }
         editor.restoreSelectionRange(editor.currentSavedSelectionRange);
     };
 
