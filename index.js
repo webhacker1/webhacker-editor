@@ -1,3 +1,4 @@
+import "katex/dist/katex.min.css";
 import "./whEditor.less";
 import WebHackerEditor from "./core/WebHackerEditor.js";
 import "./features/code/index.js";
