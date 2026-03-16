@@ -1,0 +1,213 @@
+.webhacker-menu--mermaid {
+    width: min(92vw, 520px);
+    max-width: calc(100vw - 16px);
+    max-height: min(86vh, 680px);
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.webhacker-mermaid-form {
+    display: grid;
+    gap: 10px;
+
+    &__label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted-color);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    &__meta {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: nowrap;
+    }
+
+    &__label--inline {
+        margin: 0;
+    }
+
+    &__input {
+        min-height: 156px;
+        width: 100%;
+        max-width: 100%;
+        font: inherit;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    &__docs {
+        flex-shrink: 0;
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent-color);
+        text-decoration: none;
+        border-bottom: 1px dashed rgba(37, 99, 235, 0.35);
+        line-height: 1.2;
+
+        &:hover {
+            border-bottom-color: currentColor;
+        }
+    }
+
+    &__preview {
+        min-height: 128px;
+        max-height: 260px;
+        width: 100%;
+        max-width: 100%;
+        overflow: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--background-color);
+        color: var(--text-color);
+        padding: 12px;
+        scrollbar-width: thin;
+
+        svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto;
+        }
+
+        .webhacker-mermaid__status {
+            color: var(--muted-color);
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+    }
+
+    &__preview:empty::before {
+        display: block;
+        content: attr(data-placeholder);
+        color: var(--muted-color);
+        font-size: 13px;
+        text-align: center;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+}
+
+.webhacker-content,
+.webhacker-view-content {
+    figure.webhacker-mermaid {
+        margin: 1em 0;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: var(--secondary-color, var(--background-color));
+        position: relative;
+    }
+
+    code.webhacker-mermaid__source {
+        display: none;
+    }
+
+    .webhacker-mermaid__preview {
+        min-height: 56px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--background-color);
+        color: var(--text-color);
+        padding: 8px 10px;
+        overflow: auto;
+
+        svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto;
+        }
+
+        .webhacker-mermaid__status {
+            color: var(--muted-color);
+            font-size: 13px;
+            line-height: 1.35;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+.webhacker-content {
+    .webhacker-mermaid__actions {
+        margin-top: 8px;
+        display: flex;
+        gap: 6px;
+        justify-content: flex-end;
+    }
+
+    .webhacker-mermaid__button {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: var(--background-color);
+        color: var(--text-color);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+
+        &:hover {
+            background: var(--secondary-color, var(--background-color));
+            border-color: var(--accent-color);
+        }
+
+        &:focus-visible {
+            outline: 0;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
+        }
+
+        &--edit:hover,
+        &--edit:focus-visible {
+            background: rgba(37, 99, 235, 0.16);
+            border-color: rgba(37, 99, 235, 0.48);
+            color: #1d4ed8;
+        }
+
+        &--exit:hover,
+        &--exit:focus-visible {
+            background: rgba(5, 150, 105, 0.18);
+            border-color: rgba(5, 150, 105, 0.5);
+            color: #047857;
+        }
+
+        &--delete:hover,
+        &--delete:focus-visible {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.48);
+            color: #b91c1c;
+        }
+    }
+}
+
+@media (max-width: 640px) {
+    .webhacker-menu--mermaid {
+        width: min(96vw, 96vw);
+        max-width: calc(100vw - 10px);
+        max-height: min(86vh, 84vh);
+        padding: 10px;
+    }
+
+    .webhacker-mermaid-form {
+        gap: 8px;
+
+        &__input {
+            min-height: 130px;
+        }
+
+        &__preview {
+            min-height: 108px;
+            max-height: 200px;
+            padding: 10px;
+        }
+    }
+}

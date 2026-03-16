@@ -14,7 +14,7 @@
 
     <script src="./dist/webhacker-editor.bundle.js"></script>
     <script>
-        const storageKey = "wh:safeContent";
+        const storageKey = "wh:safeContent:v2";
         const editor = new window.WebHackerEditor.default("#editor", {
             language: "ru",
             onChange: (safeHtml) => localStorage.setItem(storageKey, safeHtml)

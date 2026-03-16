@@ -10,15 +10,18 @@
 
     <script src="./dist/webhacker-editor.bundle.js"></script>
     <script>
-        const storageKey = "wh:safeContent";
+        const primaryStorageKey = "wh:safeContent:v2";
+        const legacyStorageKey = "wh:safeContent";
         const rawHtml =
-            localStorage.getItem(storageKey) ||
+            localStorage.getItem(primaryStorageKey) ||
+            localStorage.getItem(legacyStorageKey) ||
             "<h1>Новый документ</h1><p>Здесь появится ваш текст.</p>";
 
         const safeHtml = window.WebHackerEditor.sanitizeHtmlStringToSafeHtml(rawHtml);
         const contentElement = document.getElementById("content");
         contentElement.innerHTML = safeHtml;
         window.WebHackerEditor.highlightCodeBlocksInElement(contentElement);
+        window.WebHackerEditor.renderMathBlocksInElement(contentElement);
     </script>
 
 </body>
