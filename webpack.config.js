@@ -2,7 +2,7 @@ import path from "path";
 
 export default {
     mode: "production",
-    entry: "./index.js",
+    entry: "./index.ts",
     output: {
         filename: "webhacker-editor.bundle.js",
         path: path.resolve("dist"),
@@ -15,6 +15,16 @@ export default {
             {
                 test: /\.(woff2?|ttf|otf|eot)$/i,
                 type: "asset/inline"
+            },
+            {
+                test: /\.ts$/,
+                use: {
+                    loader: "ts-loader",
+                    options: {
+                        transpileOnly: true
+                    }
+                },
+                exclude: /node_modules/
             },
             {
                 test: /\.yml$/,
@@ -31,6 +41,6 @@ export default {
         ]
     },
     resolve: {
-        extensions: [".js", ".yml"]
+        extensions: [".ts", ".js", ".yml"]
     }
 };

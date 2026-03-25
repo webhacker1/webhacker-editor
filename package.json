@@ -2,11 +2,12 @@
     "name": "editorwh",
     "version": "0.0.10b-beta",
     "type": "module",
-    "main": "index.js",
+    "main": "dist/webhacker-editor.bundle.js",
     "scripts": {
         "build": "webpack",
         "start": "webpack --watch",
         "test": "vitest run",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
         "format": "prettier --write ."
     },
     "devDependencies": {
@@ -16,6 +17,8 @@
         "less-loader": "^12.3.1",
         "prettier": "^3.6.2",
         "style-loader": "^4.0.0",
+        "ts-loader": "^9.5.2",
+        "typescript": "^5.9.3",
         "vitest": "^2.1.9",
         "webpack": "^5.102.1",
         "webpack-cli": "^6.0.1",
