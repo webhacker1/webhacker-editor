@@ -1,97 +1,24 @@
-# Безопасность: как защищается HTML и где границы
+# Безопасность
 
-Этот файл важен для фронта и бэка одновременно.
+Редактор хранит и отдаёт только безопасный HTML.
 
-## 1) Простая мысль
+1. `setHTML(html)` проходит через sanitize.
+2. `getHTML()` снова санитизирует результат.
 
-Редактор помогает с безопасностью, но не заменяет безопасность сервера.
+Где правила:
+1. `constants/allowedTags.ts`
+2. `sanitize/attributes.ts`
+3. `sanitize/styles.ts`
+4. `sanitize/nodes.ts`
 
-## 2) Что делает редактор
+Проверка: `tests/sanitize.html.test.ts`, `tests/sanitize.utils.test.ts`.
 
-1. фильтрует теги и атрибуты;
-2. убирает `on*`-атрибуты вроде `onclick`;
-3. нормализует и ограничивает `href`;
-4. чистит inline-style по белому списку;
-5. на paste вставляет plain text вместо чужого HTML.
+Пример:
 
-## 3) Где это в коде
+```ts
+import { sanitizeHtmlStringToSafeHtml } from "../index";
 
-1. `sanitize/sanitize.js` - точка входа;
-2. `sanitize/nodes.js` - фильтр тегов;
-3. `sanitize/attributes.js` - фильтр атрибутов;
-4. `sanitize/styles.js` - фильтр CSS-свойств;
-5. `sanitize/utils.js` - URL/color утилиты.
-
-## 4) Реальные примеры
-
-### Пример A: script-тег
-
-Вход:
-
-```html
-<p>ok</p><script>alert(1)</script>
+const dirty = '<a href="javascript:alert(1)" onclick="x()">link</a>';
+const safe = sanitizeHtmlStringToSafeHtml(dirty);
+console.log(safe); // href станет about:blank, onclick удалится
 ```
-
-Результат после sanitize:
-
-```html
-<p>ok</p>alert(1)
-```
-
-Скрипт как тег исчезает.
-
-### Пример B: опасная ссылка
-
-Вход:
-
-```html
-<a href="javascript:alert(1)">click</a>
-```
-
-Результат:
-
-```html
-<a href="about:blank" target="_blank" rel="noopener noreferrer nofollow ugc">click</a>
-```
-
-### Пример C: грязные style
-
-Вход:
-
-```html
-<span style="color: rgb(255, 0, 0); background: yellow; text-decoration: underline">x</span>
-```
-
-Результат:
-
-```html
-<span style="color: #FF0000">x</span>
-```
-
-## 5) Что должен делать backend
-
-1. валидировать вход;
-2. использовать параметризованные SQL-запросы;
-3. ограничивать размер контента;
-4. не доверять данным с клиента;
-5. хранить и отдавать HTML как данные, а не как "исполняемый код".
-
-## 6) Безопасный поток для продакшена
-
-1. в редакторе брать `editor.getHTML()`;
-2. сохранять его в БД;
-3. в view перед `innerHTML` снова делать sanitize;
-4. после рендера запускать подсветку кода.
-
-## 7) Почему sanitize нужен и на сохранении, и на показе
-
-Причина:
-1. проверка на сохранении снижает риск попадания опасного HTML в хранилище;
-2. проверка на показе защищает от уже сохраненных данных и интеграционных ошибок.
-
-Поэтому нужны обе проверки.
-
-## 8) Что читать дальше
-
-1. [07-integration-contract.md](./07-integration-contract.md)
-2. [08-integration-guide.md](./08-integration-guide.md)
