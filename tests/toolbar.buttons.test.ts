@@ -664,6 +664,7 @@ describe("toolbar behavior", () => {
         mathInputElement.value = "\\\\frac{-b \\\\pm \\\\sqrt{b^2-4ac}}{2a}";
         mathInputElement.dispatchEvent(new Event("input", { bubbles: true }));
         click(mathInsertButtonElement);
+        console.log(editor.contentEditableElement.innerHTML);
 
         expect(editor.contentEditableElement.querySelector("figure code.language-math")).not.toBeNull();
         const serializedHtml = editor.getHTML();

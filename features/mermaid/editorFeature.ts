@@ -12,6 +12,7 @@ import {
 import en from "@/translations/en.yml";
 import ru from "@/translations/ru.yml";
 import { createElement } from "@/ui/indexUi";
+import { insertBlockElement } from "@/features/editor/insertBlock";
 
 const translations = { ru, en };
 let installed = false;
@@ -198,13 +199,7 @@ export function installMermaidFeature(WebHackerEditorClass = WebHackerEditor): v
         const figureElement = document.createElement("figure");
         setMermaidSourceValue(figureElement, normalizedSourceValue);
 
-        const insertionRange = resolveMermaidInsertionRange(this);
-        if (insertionRange) {
-            insertionRange.deleteContents();
-            insertionRange.insertNode(figureElement);
-        } else {
-            this.contentEditableElement.appendChild(figureElement);
-        }
+        insertBlockElement(this, figureElement);
 
         ensureMermaidBlockUi(this, figureElement);
         placeCaretAfterElement(figureElement);

@@ -4,6 +4,7 @@ import {
     ensureTextAnchorInTableCell,
     placeCaretAtTextNodeEnd,
 } from "@/features/table/runtime";
+import { insertBlockElement } from "@/features/editor/insertBlock";
 
 let installed = false;
 
@@ -16,15 +17,10 @@ export function installTableFeature(WebHackerEditorClass = WebHackerEditor): voi
         columnCount = 2,
     ): void {
         const tableElement = createMinimalTable(rowCount, columnCount);
+        const wrapper = document.createElement("div");
+        wrapper.appendChild(tableElement);
 
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount) {
-            const insertionRange = selection.getRangeAt(0);
-            insertionRange.deleteContents();
-            insertionRange.insertNode(tableElement);
-        } else {
-            this.contentEditableElement.appendChild(tableElement);
-        }
+        insertBlockElement(this, wrapper);
 
         const firstCellElement = tableElement.querySelector("tbody td") as HTMLElement | null;
         if (firstCellElement) {

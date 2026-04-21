@@ -3,6 +3,7 @@ import { bindMenuKeyboardNavigation, createDropdown, createMenuAction, focusFirs
 import { getSelectionAnchorElement, placeCaretInElement } from "@/features/editor/selection";
 import { escapeHtml } from "@/sanitize/indexSanitize";
 import { executeRichCommand } from "@/core/indexCore";
+import { insertBlockElement } from "@/features/editor/insertBlock";
 
 function unwrapElementKeepChildren(element) {
     if (!element || !element.parentNode) return;
@@ -99,18 +100,12 @@ function toggleCodeBlock(editor, language) {
         selection && selection.rangeCount > 0 && selection.toString() ? selection.toString() : "\u200B";
     preElement.appendChild(codeElement);
 
-    if (!selection || selection.rangeCount === 0) {
-        editor.contentEditableElement.appendChild(preElement);
-    } else {
-        const range = selection.getRangeAt(0);
-        range.deleteContents();
-        range.insertNode(preElement);
-    }
+    insertBlockElement(editor, preElement);
 
     placeCaretInElement(codeElement);
     editor.highlightCodeElement(codeElement);
     editor.ensureCodeLanguageBadge(preElement);
-}
+    }
 
 function createCodeSelectMenuItem(editor, labelText, onClickHandler, badgeText = null) {
     const menuItemElement = createElement("button", "webhacker-menu__item", {

@@ -60,6 +60,11 @@ export async function renderMermaidSourceToHtml(sourceValue: string): Promise<st
     ensureMermaidInitialized();
 
     const renderId = `wh-mermaid-${++renderIdSeed}`;
+    const container = document.createElement("div");
+    container.id = `d${renderId}`;
+    container.style.cssText = "position:absolute;top:-9999px;left:-9999px;visibility:hidden;pointer-events:none;";
+    document.body.appendChild(container);
+
     const renderResult = await mermaid.render(renderId, normalizedSource).then(
         result => result,
         error => {
@@ -67,6 +72,9 @@ export async function renderMermaidSourceToHtml(sourceValue: string): Promise<st
             return `<div class="webhacker-mermaid__status">${escapeHtml(errorMessage)}</div>`;
         },
     );
+    
+    container.remove();
+    document.getElementById(`d${renderId}`)?.remove();
 
     if (typeof renderResult === "string") return renderResult;
     if (renderResult && typeof renderResult.svg === "string") return renderResult.svg;

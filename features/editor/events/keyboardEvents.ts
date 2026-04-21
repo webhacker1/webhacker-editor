@@ -15,7 +15,7 @@ import {
     shouldBlockMathFigureDeletion,
     triggerToolbarControl
 } from "@/features/editor/events/utils/indexEventUtils";
-import { getSelectionAnchorElement, placeCaretAfterElement } from "@/features/editor/selection";
+import { getSelectionAnchorElement, placeCaretAfterElement, splitBlockAtCaret} from "@/features/editor/selection";
 import { SHORTCUT_ACTIONS, matchesShortcutEvent } from "@/features/editor/shortcuts";
 
 export function bindKeyboardEvents(editor: EditorEventContext): void {
@@ -164,7 +164,22 @@ export function bindKeyboardEvents(editor: EditorEventContext): void {
                     editor.emitChange();
                     editor.syncToggleStates();
                 }
+                return;
             }
+            if (activeTableCellElement) return;
+
+            event.preventDefault();
+            const newParagraph = document.createElement("p");
+            splitBlockAtCaret(editor, newParagraph);
+
+            const newRange = document.createRange();
+            newRange.setStart(newParagraph, 0);
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+
+            editor.emitChange();
+            editor.syncToggleStates();
         }
     });
 }

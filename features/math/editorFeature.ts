@@ -12,6 +12,7 @@ import {
 import en from "@/translations/en.yml";
 import ru from "@/translations/ru.yml";
 import { createElement } from "@/ui/indexUi";
+import { insertBlockElement } from "@/features/editor/insertBlock";
 
 const translations = { ru, en };
 let installed = false;
@@ -214,13 +215,7 @@ export function installMathFeature(WebHackerEditorClass = WebHackerEditor): void
         const figureElement = document.createElement("figure");
         setMathLatexValue(figureElement, normalizedLatexValue);
 
-        const insertionRange = resolveMathInsertionRange(this);
-        if (insertionRange) {
-            insertionRange.deleteContents();
-            insertionRange.insertNode(figureElement);
-        } else {
-            this.contentEditableElement.appendChild(figureElement);
-        }
+        insertBlockElement(this, figureElement);
 
         ensureMathBlockUi(this, figureElement);
         placeCaretAfterElement(figureElement);
