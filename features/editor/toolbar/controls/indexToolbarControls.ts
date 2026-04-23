@@ -4,3 +4,4 @@ export { createMathDropdown } from "@/features/editor/toolbar/controls/mathContr
 export { createMermaidDropdown } from "@/features/editor/toolbar/controls/mermaidControl";
 export { createShortcutsHelpDropdown } from "@/features/editor/toolbar/controls/shortcutsControl";
 export { createTableDropdown } from "@/features/editor/toolbar/controls/tableControl";
+export { createVoiceControl } from "@/features/editor/toolbar/controls/voiceControl";

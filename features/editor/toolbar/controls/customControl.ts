@@ -7,13 +7,15 @@ import {
     createMathDropdown,
     createMermaidDropdown,
     createShortcutsHelpDropdown,
-    createTableDropdown
+    createTableDropdown,
+    createVoiceControl
 } from "@/features/editor/toolbar/controls/indexToolbarControls";
 
 const CUSTOM_CONTROLS = {
     code: createCodeDropdown,
     math: createMathDropdown,
     mermaid: createMermaidDropdown,
+    voice: createVoiceControl,
     color: createColorDropdown,
     link: createLinkDropdown,
     imageDisabled: createImageDisabledButton,

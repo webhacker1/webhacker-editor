@@ -11,6 +11,7 @@
 - `codeControls.ts` — кнопки/меню для code block.
 - `mathControl.ts` — вставка и управление math.
 - `mermaidControl.ts` — вставка и управление mermaid.
+- `voiceControl.ts` — голосовой ввод (диктовка в текущую позицию курсора).
 - `tableControl.ts` — вставка таблиц.
 - `shortcutsControl.ts` — подсказки по горячим клавишам.
 - `customControl.ts` — кастомные контролы.

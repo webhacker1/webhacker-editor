@@ -4,7 +4,7 @@ export const MERMAID_DOCS_URL = "https://mermaid.js.org/intro/syntax-reference.h
 export const TOOLBAR_LAYOUT: Array<"separator" | string[]> = [
     ["undo", "redo"],
     "separator",
-    ["bold", "italic", "underline", "code", "math", "mermaid", "color", "link", "imageDisabled"],
+    ["bold", "italic", "underline", "code", "math", "mermaid", "voice", "color", "link", "imageDisabled"],
     "separator",
     ["heading"],
     "separator",

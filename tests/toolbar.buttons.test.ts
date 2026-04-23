@@ -60,6 +60,12 @@ vi.mock("@/translations/en.yml", () => ({
             deleteBlock: "Delete diagram",
             exitBlock: "Exit diagram block"
         },
+        voice: {
+            label: "Voice",
+            start: "Start voice input",
+            stop: "Stop voice input",
+            unsupported: "Voice input is not supported in this browser"
+        },
         reset_styles: "Reset styles",
         link: "Link",
         image: "Image",
@@ -151,6 +157,12 @@ vi.mock("@/translations/ru.yml", () => ({
             editBlock: "Edit diagram",
             deleteBlock: "Delete diagram",
             exitBlock: "Exit diagram block"
+        },
+        voice: {
+            label: "Voice",
+            start: "Start voice input",
+            stop: "Stop voice input",
+            unsupported: "Voice input is not supported in this browser"
         },
         reset_styles: "Reset styles",
         link: "Link",
@@ -324,6 +336,7 @@ describe("toolbar behavior", () => {
         expect(getToolbarButtonByLabel(editor, "Code")).not.toBeNull();
         expect(getToolbarButtonByLabel(editor, "Formula")).not.toBeNull();
         expect(getToolbarButtonByLabel(editor, "Diagram")).not.toBeNull();
+        expect(getToolbarButtonByLabel(editor, "Start voice input")).not.toBeNull();
         expect(getToolbarButtonByLabel(editor, "Table")).not.toBeNull();
     });
 
