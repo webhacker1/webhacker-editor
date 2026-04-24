@@ -138,6 +138,8 @@ export function createVoiceControl(editor, t) {
     let recognition: SpeechRecognitionLike | null = null;
     let liveTextNode: Text | null = null;
     let isListening = false;
+    let manualStop = false;
+    let isRestarting = false;
 
     const buttonElement = createToolbarButton(editor, {
         iconClassName: "fa-solid fa-microphone",
@@ -146,6 +148,7 @@ export function createVoiceControl(editor, t) {
         onClickHandler: () => {
             if (!SpeechRecognitionClass) return false;
             if (isListening) {
+                manualStop = true;
                 recognition?.stop();
                 return false;
             }
@@ -171,19 +174,31 @@ export function createVoiceControl(editor, t) {
                     finalizeLiveText(editor, liveTextNode);
                     liveTextNode = null;
                     isListening = false;
+                    manualStop = false;
+                    isRestarting = false;
                     updateVoiceButtonState(buttonElement, iconElement, isListening, idleLabel, stopLabel);
                 });
 
                 recognition.addEventListener("end", () => {
+                    isRestarting = false;
+                    if (!manualStop) {
+                        recognition.lang = resolveVoiceLanguage(editor);
+                        isRestarting = true;
+                        updateVoiceButtonState(buttonElement, iconElement, true, idleLabel, stopLabel);
+                        recognition.start();
+                        return;
+                    }
                     finalizeLiveText(editor, liveTextNode);
                     liveTextNode = null;
                     isListening = false;
+                    manualStop = false;
                     updateVoiceButtonState(buttonElement, iconElement, isListening, idleLabel, stopLabel);
                 });
             }
 
             recognition.lang = resolveVoiceLanguage(editor);
             liveTextNode = null;
+            manualStop = false;
             isListening = true;
             updateVoiceButtonState(buttonElement, iconElement, isListening, idleLabel, stopLabel);
             recognition.start();

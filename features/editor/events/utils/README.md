@@ -10,6 +10,7 @@
 - `plainTextExtractor.ts` — достать plain text из clipboard.
 - `selectionUtils.ts` — вспомогательные функции по выделению.
 - `toolbarUtils.ts` — связь событий с toolbar.
+- `editorContext.ts` — тип и определение активного контекста курсора (код, список, таблица и т.д.).
 
 ## Пример
 ```ts
