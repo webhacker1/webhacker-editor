@@ -58,16 +58,23 @@ export function splitBlockAtCaret(editor, newElement: HTMLElement): void {
 
     if (!currentBlock || !range || currentBlock === editor.contentEditableElement) return;
 
-    range.deleteContents();
+    if (!range.collapsed) {
+        range.deleteContents();
+    }
 
     const afterRange = document.createRange();
     afterRange.setStart(range.endContainer, range.endOffset);
-    if (currentBlock.lastChild) afterRange.setEndAfter(currentBlock.lastChild);
-    else afterRange.setEnd(currentBlock, 0);
+    afterRange.setEndAfter(currentBlock.lastChild ?? currentBlock);
 
     const afterFragment = afterRange.extractContents();
-    const isEmpty = afterFragment.textContent === "" && !afterFragment.querySelector("br, img");
-    newElement.appendChild(isEmpty ? document.createElement("br") : afterFragment);
+    const hasContent = afterFragment.textContent !== "" || !!afterFragment.querySelector("img");
+
+    newElement.appendChild(hasContent ? afterFragment : document.createElement("br"));
+
+    if (currentBlock.textContent === "" && !currentBlock.querySelector("img")) {
+        currentBlock.innerHTML = "";
+        currentBlock.appendChild(document.createElement("br"));
+    }
 
     currentBlock.after(newElement);
 }

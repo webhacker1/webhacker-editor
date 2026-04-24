@@ -9,77 +9,175 @@ import { executeRichCommand } from "@/core/indexCore";
 import type { EditorEventContext } from "@/features/editor/events/eventTypes";
 import {
     getAdjacentTableCell,
-    getSelectionListItem,
     isCaretAtCodeStart,
     isCaretAtElementStart,
     shouldBlockMathFigureDeletion,
     triggerToolbarControl
 } from "@/features/editor/events/utils/indexEventUtils";
-import { getSelectionAnchorElement, placeCaretAfterElement, splitBlockAtCaret} from "@/features/editor/selection";
+import { getSelectionAnchorElement, placeCaretAfterElement, splitBlockAtCaret } from "@/features/editor/selection";
 import { SHORTCUT_ACTIONS, matchesShortcutEvent } from "@/features/editor/shortcuts";
+import { resolveEditorContext, EDITOR_CONTEXT } from "@/features/editor/events/utils/editorContext";
 
 export function bindKeyboardEvents(editor: EditorEventContext): void {
     editor.contentEditableElement.addEventListener("keydown", event => {
         const hasCommandModifier = event.ctrlKey || event.metaKey;
         const selection = window.getSelection();
         const anchorNode = getSelectionAnchorElement(selection);
-        const activePreElement = anchorNode && anchorNode.closest ? anchorNode.closest("pre") : null;
-        const activeCodeElement = activePreElement
-            ? activePreElement.querySelector("code")
-            : anchorNode && anchorNode.closest
-              ? anchorNode.closest("pre code")
-              : null;
-        const nearestCodeElement = anchorNode && anchorNode.closest ? anchorNode.closest("code") : null;
-        const activeTableCellElement = anchorNode && anchorNode.closest ? anchorNode.closest("td,th") : null;
-        const inlineCodeElement =
-            nearestCodeElement && nearestCodeElement.closest && !nearestCodeElement.closest("pre")
-                ? nearestCodeElement
-                : null;
-        const activeListItemElement = getSelectionListItem(selection);
+        const anchor = anchorNode instanceof HTMLElement ? anchorNode : anchorNode?.parentElement;
+        const ctx = resolveEditorContext(anchor ?? null, editor);
 
-        if (event.key === KEY_BACKSPACE || event.key === KEY_DELETE) {
-            const direction = event.key === KEY_BACKSPACE ? -1 : 1;
-            if (shouldBlockMathFigureDeletion(editor, selection, direction)) {
-                event.preventDefault();
-                return;
-            }
-        }
+        const emit = () => { editor.emitChange(); editor.syncToggleStates(); };
+        const makeP = () => { const p = document.createElement("p"); p.appendChild(document.createElement("br")); return p; };
+        const placeCaretAt = (node: Node, offset = 0) => { const r = document.createRange(); r.setStart(node, offset); r.collapse(true); selection?.removeAllRanges(); selection?.addRange(r); };
 
-        if ((event.key === KEY_BACKSPACE || event.key === KEY_DELETE) && activePreElement) {
-            const codeElement = activePreElement.querySelector("code");
-            if (!(codeElement instanceof HTMLElement) || !(activeCodeElement instanceof HTMLElement)) {
-                event.preventDefault();
-                return;
-            }
+        if (event.key === KEY_BACKSPACE) {
+            const currentBlock = anchor?.closest("p, h1, h2, h3, h4, h5, h6, blockquote");
+            const prevSibling = currentBlock?.previousElementSibling;
+            const isBlockEmpty = currentBlock?.textContent === "" && !currentBlock?.querySelector("img");
+
             if (
-                event.key === KEY_BACKSPACE &&
-                selection &&
-                selection.isCollapsed &&
-                isCaretAtCodeStart(activeCodeElement, selection)
+                selection?.isCollapsed &&
+                ctx.type !== EDITOR_CONTEXT.Code && ctx.type !== EDITOR_CONTEXT.List &&
+                isBlockEmpty &&
+                prevSibling?.tagName === "FIGURE" &&
+                isCaretAtElementStart(currentBlock as HTMLElement, selection)
             ) {
                 event.preventDefault();
+                currentBlock.remove();
+                placeCaretAfterElement(prevSibling);
+                emit();
+                return;
+            }
+
+            if (shouldBlockMathFigureDeletion(editor, selection, -1)) {
+                event.preventDefault();
+                return;
+            }
+
+            if (ctx.type === EDITOR_CONTEXT.Code) {
+                if (!(ctx.element instanceof HTMLElement)) { event.preventDefault(); return; }
+                if (selection?.isCollapsed && isCaretAtCodeStart(ctx.element, selection)) {
+                    event.preventDefault();
+                    return;
+                }
+            }
+
+            if (ctx.type === EDITOR_CONTEXT.List && selection?.isCollapsed && isCaretAtElementStart(ctx.element, selection)) {
+                event.preventDefault();
+                const handled = executeRichCommand("backspaceListItem", null, editor);
+                if (handled) emit();
                 return;
             }
         }
 
-        if (
-            event.key === KEY_BACKSPACE &&
-            activeListItemElement &&
-            !activeCodeElement &&
-            selection &&
-            selection.isCollapsed &&
-            isCaretAtElementStart(activeListItemElement, selection)
-        ) {
-            event.preventDefault();
-            const handled = executeRichCommand("backspaceListItem", null, editor);
-            if (handled) {
-                editor.emitChange();
-                editor.syncToggleStates();
+        if (event.key === KEY_DELETE) {
+            if (shouldBlockMathFigureDeletion(editor, selection, 1)) {
+                event.preventDefault();
+                return;
             }
-            return;
+
+            if (ctx.type === EDITOR_CONTEXT.Code && !(ctx.element instanceof HTMLElement)) {
+                event.preventDefault();
+                return;
+            }
         }
 
-        if (hasCommandModifier && event.code === CODE_KEY_A && !event.shiftKey && !event.altKey && activeCodeElement) {
+        if (event.key === KEY_TAB) {
+            if (ctx.type === EDITOR_CONTEXT.Code) {
+                event.preventDefault();
+                executeRichCommand("insertText", "    ", editor);
+                requestAnimationFrame(() => editor.highlightCodeAtCaret());
+                editor.emitChange();
+                return;
+            }
+
+            if (ctx.type === EDITOR_CONTEXT.Table) {
+                event.preventDefault();
+                const direction = event.shiftKey ? -1 : 1;
+                const next = getAdjacentTableCell(ctx.element, direction);
+                if (next) {
+                    editor.ensureCaretAnchorInTableCell(next, true);
+                    editor.syncToggleStates();
+                } else if (!event.shiftKey) {
+                    editor.exitTableToNextLine(ctx.element);
+                }
+                return;
+            }
+
+            if (ctx.type === EDITOR_CONTEXT.List) {
+                event.preventDefault();
+                const handled = executeRichCommand(event.shiftKey ? "outdent" : "sinkListItem", null, editor);
+                if (handled) emit();
+                return;
+            }
+        }
+
+        if (event.key === KEY_ENTER) {
+            if (ctx.type === EDITOR_CONTEXT.Code && hasCommandModifier && !event.shiftKey) {
+                event.preventDefault();
+                editor.exitCodeBlockToNextLine(ctx.element);
+                return;
+            }
+
+            if (ctx.type === EDITOR_CONTEXT.InlineCode) {
+                event.preventDefault();
+                placeCaretAfterElement(ctx.element);
+                executeRichCommand("insertParagraph", null, editor);
+                emit();
+                return;
+            }
+
+            if (!event.shiftKey && ctx.type !== EDITOR_CONTEXT.Code) {
+                event.preventDefault();
+                Array.from(editor.contentEditableElement.childNodes).forEach(node => {
+                    if (node.nodeType === Node.TEXT_NODE && (node.textContent || "").trim() !== "") {
+                        const p = document.createElement("p");
+                        node.replaceWith(p);
+                        p.appendChild(node);
+                    }
+                });
+
+                if (ctx.type === EDITOR_CONTEXT.List) {
+                    const handled = executeRichCommand("splitListItem", null, editor);
+                    if (handled) { event.preventDefault(); emit(); }
+                    return;
+                }
+
+                if (ctx.type === EDITOR_CONTEXT.Table) return;
+
+                if (ctx.type === EDITOR_CONTEXT.Heading) {
+                    const isEmpty = ctx.element.textContent === "" && !ctx.element.querySelector("img");
+                    if (isEmpty || isCaretAtElementStart(ctx.element, selection)) {
+                        const p = makeP();
+                        if (isEmpty) {
+                            ctx.element.after(p);
+                            placeCaretAt(p, 0);
+                        } else {
+                            ctx.element.before(p);
+                            placeCaretAt(ctx.element, 0);
+                        }
+                        emit();
+                        return;
+                    }
+                }
+
+                if (editor.contentEditableElement.children.length === 0) {
+                    const first = makeP();
+                    const second = makeP();
+                    editor.contentEditableElement.append(first, second);
+                    placeCaretAt(second, 0);
+                    emit();
+                    return;
+                }
+
+                const newParagraph = document.createElement("p");
+                splitBlockAtCaret(editor, newParagraph);
+                placeCaretAt(newParagraph, 0);
+                emit();
+            }
+        }
+
+        if (hasCommandModifier && event.code === CODE_KEY_A && !event.shiftKey && !event.altKey && ctx.type === EDITOR_CONTEXT.Code) {
             event.preventDefault();
             return;
         }
@@ -88,8 +186,7 @@ export function bindKeyboardEvents(editor: EditorEventContext): void {
             shortcutAction.shortcuts.some(shortcutDef => matchesShortcutEvent(event, shortcutDef)),
         );
         if (matchingShortcutAction) {
-            if (activeCodeElement && !matchingShortcutAction.allowInCodeBlock) return;
-
+            if (ctx.type === EDITOR_CONTEXT.Code && !matchingShortcutAction.allowInCodeBlock) return;
             if (matchingShortcutAction.type === "control") {
                 if (triggerToolbarControl(editor, matchingShortcutAction.controlId)) {
                     event.preventDefault();
@@ -98,88 +195,9 @@ export function bindKeyboardEvents(editor: EditorEventContext): void {
             } else if (matchingShortcutAction.type === "command") {
                 event.preventDefault();
                 const handled = executeRichCommand(matchingShortcutAction.command, null, editor);
-                if (handled) {
-                    editor.emitChange();
-                    editor.syncToggleStates();
-                }
+                if (handled) emit();
                 return;
             }
-        }
-
-        if (event.key === KEY_TAB && activeCodeElement) {
-            event.preventDefault();
-            executeRichCommand("insertText", "    ", editor);
-            requestAnimationFrame(() => editor.highlightCodeAtCaret());
-            editor.emitChange();
-            return;
-        }
-
-        if (event.key === KEY_TAB && activeTableCellElement && !activeCodeElement) {
-            event.preventDefault();
-            if (!(activeTableCellElement instanceof HTMLElement)) return;
-            const direction = event.shiftKey ? -1 : 1;
-            const nextTableCellElement = getAdjacentTableCell(activeTableCellElement, direction);
-            if (nextTableCellElement) {
-                editor.ensureCaretAnchorInTableCell(nextTableCellElement, true);
-                editor.syncToggleStates();
-            } else if (!event.shiftKey) {
-                editor.exitTableToNextLine(activeTableCellElement);
-            }
-            return;
-        }
-
-        if (event.key === KEY_TAB && activeListItemElement && !activeCodeElement && !activeTableCellElement) {
-            event.preventDefault();
-            const commandName = event.shiftKey ? "outdent" : "sinkListItem";
-            const handled = executeRichCommand(commandName, null, editor);
-            if (handled) {
-                editor.emitChange();
-                editor.syncToggleStates();
-            }
-            return;
-        }
-
-        if (event.key === KEY_ENTER && activeCodeElement && hasCommandModifier && !event.shiftKey) {
-            event.preventDefault();
-            if (!(activeCodeElement instanceof HTMLElement)) return;
-            editor.exitCodeBlockToNextLine(activeCodeElement);
-            return;
-        }
-
-        if (event.key === KEY_ENTER && inlineCodeElement) {
-            event.preventDefault();
-            if (!(inlineCodeElement instanceof HTMLElement)) return;
-            placeCaretAfterElement(inlineCodeElement);
-            executeRichCommand("insertParagraph", null, editor);
-            editor.emitChange();
-            editor.syncToggleStates();
-            return;
-        }
-
-        if (event.key === KEY_ENTER && !event.shiftKey && !activeCodeElement) {
-            if (activeListItemElement) {
-                const handled = executeRichCommand("splitListItem", null, editor);
-                if (handled) {
-                    event.preventDefault();
-                    editor.emitChange();
-                    editor.syncToggleStates();
-                }
-                return;
-            }
-            if (activeTableCellElement) return;
-
-            event.preventDefault();
-            const newParagraph = document.createElement("p");
-            splitBlockAtCaret(editor, newParagraph);
-
-            const newRange = document.createRange();
-            newRange.setStart(newParagraph, 0);
-            newRange.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-
-            editor.emitChange();
-            editor.syncToggleStates();
         }
     });
 }

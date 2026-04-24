@@ -52,6 +52,23 @@
         outline-offset: 1px;
     }
 
+    &:has(.fa-stop) {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+
+        .fa-stop {
+            color: #ef4444;
+        }
+
+        &:hover {
+            background: rgba(239, 68, 68, 0.18);
+        }
+        
+        &[aria-pressed="true"] {
+            outline-color: #ef4444;
+        }
+    }
+
     &--primary,
     &--primary:hover {
         background: var(--accent-color);
@@ -110,6 +127,10 @@
     height: 1em;
 
     > .fa-image {
+        color: var(--muted-color);
+    }
+
+    > .fa-microphone {
         color: var(--muted-color);
     }
 

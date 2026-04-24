@@ -336,7 +336,11 @@ describe("toolbar behavior", () => {
         expect(getToolbarButtonByLabel(editor, "Code")).not.toBeNull();
         expect(getToolbarButtonByLabel(editor, "Formula")).not.toBeNull();
         expect(getToolbarButtonByLabel(editor, "Diagram")).not.toBeNull();
-        expect(getToolbarButtonByLabel(editor, "Start voice input")).not.toBeNull();
+        const voiceButtonElement = editor.toolbarElement.querySelector(
+            '.webhacker-button[data-control-id=\"voice\"]'
+        ) as HTMLButtonElement;
+        expect(voiceButtonElement).not.toBeNull();
+        expect(voiceButtonElement.disabled).toBe(true);
         expect(getToolbarButtonByLabel(editor, "Table")).not.toBeNull();
     });
 

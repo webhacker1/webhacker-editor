@@ -34,11 +34,17 @@ export function insertBlockElement(editor, element: HTMLElement): void {
 
         const afterFragment = afterRange.extractContents();
         const isEmpty = afterFragment.textContent === "" && !afterFragment.querySelector("br, img");
+        const currentBlockEmpty = currentBlock.textContent === "" && !currentBlock.querySelector("br, img");
+
         const afterParagraph = document.createElement("p");
         afterParagraph.appendChild(isEmpty ? document.createElement("br") : afterFragment);
 
-        currentBlock.after(element);
-        element.after(afterParagraph);
+        if (currentBlockEmpty) {
+            currentBlock.replaceWith(element, afterParagraph);
+        } else {
+            currentBlock.after(element);
+            element.after(afterParagraph);
+        }
     } else {
         editor.contentEditableElement.appendChild(element);
     }

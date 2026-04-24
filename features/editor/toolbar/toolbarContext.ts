@@ -92,6 +92,7 @@ export function createToolbarButton(
     const iconElement = createElement("i", iconClassName);
     buttonElement.appendChild(iconElement);
     buttonElement.addEventListener("mousedown", event => {
+        if (buttonElement.disabled || buttonElement.getAttribute("aria-disabled") === "true") return;
         event.preventDefault();
         const activeRangeInEditor = getActiveSelectionRangeInEditor(editor);
         if (activeRangeInEditor) {
@@ -99,6 +100,7 @@ export function createToolbarButton(
         }
     });
     buttonElement.addEventListener("click", event => {
+        if (buttonElement.disabled || buttonElement.getAttribute("aria-disabled") === "true") return;
         event.preventDefault();
         event.stopPropagation();
         const scrollY = window.scrollY;

@@ -1,4 +1,5 @@
 import { createToolbarButton } from "@/features/editor/toolbar/toolbarContext";
+import { createElement } from "@/ui/indexUi";
 
 type SpeechRecognitionAlternativeLike = {
     transcript?: string;
@@ -17,6 +18,18 @@ type SpeechRecognitionLike = {
     stop: () => void;
     addEventListener: (type: string, listener: (event: Event) => void) => void;
 };
+
+type SpeechRecognitionErrorLike = Event & {
+    error?: string;
+};
+
+const VOICE_FATAL_ERROR_SET = new Set([
+    "not-allowed",
+    "service-not-allowed",
+    "language-not-supported",
+    "audio-capture",
+]);
+const VOICE_CONTROL_ENABLED = false;
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
@@ -128,7 +141,28 @@ function updateVoiceButtonState(
     if (iconElement) iconElement.className = isListening ? "fa-solid fa-stop" : "fa-solid fa-microphone";
 }
 
+function createDisabledVoiceButton(t): HTMLButtonElement {
+    const buttonElement = createElement("button", "webhacker-button", {
+        type: "button",
+        "aria-label": `${t.voice.label} (${t.soon})`,
+        "aria-disabled": "true",
+        "data-tooltip": t.soon
+    }) as HTMLButtonElement;
+
+    const iconWrapElement = createElement("span", "webhacker-button__icon-lock");
+    const voiceIconElement = createElement("i", "fa-solid fa-microphone");
+    const lockIconElement = createElement("i", "fa-solid fa-lock");
+    lockIconElement.setAttribute("aria-hidden", "true");
+    iconWrapElement.append(voiceIconElement, lockIconElement);
+    buttonElement.appendChild(iconWrapElement);
+    buttonElement.disabled = true;
+
+    return buttonElement;
+}
+
 export function createVoiceControl(editor, t) {
+    if (!VOICE_CONTROL_ENABLED) return createDisabledVoiceButton(t);
+
     const voiceT = t.voice;
     const idleLabel = voiceT.start;
     const stopLabel = voiceT.stop;
@@ -137,7 +171,56 @@ export function createVoiceControl(editor, t) {
     const SpeechRecognitionClass = resolveSpeechRecognitionConstructor();
     let recognition: SpeechRecognitionLike | null = null;
     let liveTextNode: Text | null = null;
-    let isListening = false;
+    let state: "idle" | "starting" | "listening" = "idle";
+    let shouldListen = false;
+    let restartTimerId: number | null = null;
+
+    const isActive = () => state === "starting" || state === "listening";
+
+    const clearRestartTimer = () => {
+        if (restartTimerId === null) return;
+        window.clearTimeout(restartTimerId);
+        restartTimerId = null;
+    };
+
+    const updateButton = () => {
+        updateVoiceButtonState(buttonElement, iconElement, isActive(), idleLabel, stopLabel);
+    };
+
+    const scheduleRestart = () => {
+        clearRestartTimer();
+        restartTimerId = window.setTimeout(() => {
+            restartTimerId = null;
+            requestStart();
+        }, 180);
+    };
+
+    const stopSession = () => {
+        state = "idle";
+        shouldListen = false;
+        clearRestartTimer();
+        updateButton();
+    };
+
+    const requestStart = () => {
+        if (!recognition) return;
+        if (!shouldListen) return;
+        if (state !== "idle") return;
+
+        recognition.lang = resolveVoiceLanguage(editor);
+        state = "starting";
+        updateButton();
+        try {
+            recognition.start();
+        } catch (_error) {
+            state = "idle";
+            if (!shouldListen) {
+                updateButton();
+                return;
+            }
+            scheduleRestart();
+        }
+    };
 
     const buttonElement = createToolbarButton(editor, {
         iconClassName: "fa-solid fa-microphone",
@@ -145,7 +228,10 @@ export function createVoiceControl(editor, t) {
         emitChangeAfterClick: false,
         onClickHandler: () => {
             if (!SpeechRecognitionClass) return false;
-            if (isListening) {
+
+            if (isActive()) {
+                shouldListen = false;
+                clearRestartTimer();
                 recognition?.stop();
                 return false;
             }
@@ -154,6 +240,11 @@ export function createVoiceControl(editor, t) {
                 recognition = new SpeechRecognitionClass();
                 recognition.continuous = true;
                 recognition.interimResults = true;
+
+                recognition.addEventListener("start", () => {
+                    state = "listening";
+                    updateButton();
+                });
 
                 recognition.addEventListener("result", event => {
                     const transcript = extractStreamingTranscript(event);
@@ -167,26 +258,36 @@ export function createVoiceControl(editor, t) {
                     editor.syncToggleStates();
                 });
 
-                recognition.addEventListener("error", () => {
+                recognition.addEventListener("error", event => {
+                    const speechErrorEvent = event as SpeechRecognitionErrorLike;
+                    const errorCode = speechErrorEvent.error || "";
+
+                    if (shouldListen && !VOICE_FATAL_ERROR_SET.has(errorCode)) {
+                        state = "idle";
+                        scheduleRestart();
+                        return;
+                    }
+
                     finalizeLiveText(editor, liveTextNode);
                     liveTextNode = null;
-                    isListening = false;
-                    updateVoiceButtonState(buttonElement, iconElement, isListening, idleLabel, stopLabel);
+                    stopSession();
                 });
 
                 recognition.addEventListener("end", () => {
                     finalizeLiveText(editor, liveTextNode);
                     liveTextNode = null;
-                    isListening = false;
-                    updateVoiceButtonState(buttonElement, iconElement, isListening, idleLabel, stopLabel);
+                    state = "idle";
+                    if (shouldListen) {
+                        scheduleRestart();
+                        return;
+                    }
+                    updateButton();
                 });
             }
 
-            recognition.lang = resolveVoiceLanguage(editor);
             liveTextNode = null;
-            isListening = true;
-            updateVoiceButtonState(buttonElement, iconElement, isListening, idleLabel, stopLabel);
-            recognition.start();
+            shouldListen = true;
+            requestStart();
 
             return false;
         },
@@ -203,6 +304,6 @@ export function createVoiceControl(editor, t) {
         return buttonElement;
     }
 
-    updateVoiceButtonState(buttonElement, iconElement, isListening, idleLabel, stopLabel);
+    updateButton();
     return buttonElement;
 }
