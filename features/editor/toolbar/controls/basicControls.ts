@@ -244,7 +244,7 @@ export function createLinkDropdown(editor, t) {
             );
             targetLinkElement = null;
             return true;
-        })
+        }, { preferSavedSelection: true })
     );
 
     linkRemoveButtonElement.addEventListener(
@@ -260,7 +260,7 @@ export function createLinkDropdown(editor, t) {
             linkUrlInputElement.value = "";
             linkTextInputElement.value = "";
             return true;
-        })
+        }, { preferSavedSelection: true })
     );
 
     bindMenuKeyboardNavigation(editor, dropdownMenuElement, { columnsCount: 1 });

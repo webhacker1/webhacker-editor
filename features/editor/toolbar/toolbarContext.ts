@@ -227,7 +227,11 @@ export function bindMenuKeyboardNavigation(
     });
 }
 
-export function createMenuAction(editor, actionCallback) {
+export function createMenuAction(
+    editor,
+    actionCallback,
+    { preferSavedSelection = false } = {}
+) {
     return event => {
         if (event) {
             event.preventDefault();
@@ -238,6 +242,13 @@ export function createMenuAction(editor, actionCallback) {
 
         editor.closeAllMenus();
         focusEditorContent(editor);
+        if (
+            preferSavedSelection &&
+            editor.currentSavedSelectionRange &&
+            isRangeInsideEditor(editor, editor.currentSavedSelectionRange)
+        ) {
+            editor.restoreSelectionRange(editor.currentSavedSelectionRange);
+        }
         ensureValidSelectionInEditor(editor);
 
         const actionResult = actionCallback ? actionCallback() : true;

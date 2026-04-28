@@ -765,7 +765,7 @@ describe("toolbar behavior", () => {
             ".webhacker-input"
         );
         urlInputElement.value = "example.com";
-        textInputElement.value = "My Link";
+        textInputElement.value = "";
 
         const okButtonElement = [...editor.toolbarElement.querySelectorAll(".webhacker-button")].find(
             buttonElement => buttonElement.textContent.trim() === "OK"
@@ -775,6 +775,7 @@ describe("toolbar behavior", () => {
         const linkElement = editor.contentEditableElement.querySelector("a");
         expect(linkElement).not.toBeNull();
         expect(linkElement.getAttribute("href")).toContain("example.com");
+        expect(linkElement.textContent).toBe("site");
     });
 
     it("updates existing link instead of nesting a new anchor", () => {
