@@ -1,9 +1,9 @@
-# Quick Start: запуск проекта за 10-15 минут
+# Быстрый старт
 
-## 1) Что нужно заранее
+## Требования
 
-1. `Node.js` 18+
-2. `npm` 9+
+1. `Node.js >= 20`
+2. `npm >= 10`
 
 Проверка:
 
@@ -12,86 +12,37 @@ node -v
 npm -v
 ```
 
-## 2) Установка зависимостей
+## Установка и запуск
 
 ```bash
 npm install
-```
-
-## 3) Основные команды
-
-1. Сборка:
-
-```bash
+npm run typecheck
+npm test
 npm run build
 ```
 
-2. Режим разработки:
+Локальная разработка (watch):
 
 ```bash
 npm run start
 ```
 
-3. Тесты:
-
-```bash
-npm test
-```
-
-## 4) Что должно получиться после сборки
-
-1. появится `dist/webhacker-editor.bundle.js`;
-2. можно подключать бандл на страницу;
-3. редактор создается через `new window.WebHackerEditor.default(...)`.
-
-## 5) Минимальный локальный smoke-check
-
-1. Открой `index.html`.
-2. Проверь, что toolbar виден.
-3. Проверь `Bold`.
-4. Проверь `Inline code`.
-5. Проверь `Code block`.
-6. Проверь вставку текста через paste.
-7. Проверь таблицу.
-8. Убедись, что `onChange` возвращает HTML.
-
-## 6) Пример инициализации с начальными данными
-
-```js
-const editor = new window.WebHackerEditor.default("#editor", {
-  language: "ru",
-  placeholderText: "Напиши что-нибудь",
-  onChange: (safeHtml) => {
-    console.log("changed", safeHtml);
-  }
-});
-
-editor.setHTML("<p>Привет, команда</p>");
-```
-
-## 7) Пример view-страницы
+## Минимальная интеграция в страницу
 
 ```html
-<article id="content" class="webhacker-view-content"></article>
-<script src="/dist/webhacker-editor.bundle.js"></script>
+<script src="./dist/webhacker-editor.bundle.js"></script>
+<div id="editor"></div>
 <script>
-  const rawHtml = "<pre><code class='language-javascript'>const x = 1;</code></pre>";
-  const safeHtml = window.WebHackerEditor.sanitizeHtmlStringToSafeHtml(rawHtml);
-  const content = document.getElementById("content");
-  content.innerHTML = safeHtml;
-  window.WebHackerEditor.highlightCodeBlocksInElement(content);
+  const editor = new window.WebHackerEditor.default("#editor", {
+    language: "ru",
+    placeholderText: "Введите текст...",
+    onChange: safeHtml => console.log(safeHtml)
+  });
 </script>
 ```
 
-## 8) Если возникли проблемы
+## Частые проблемы
 
-1. Проверь версии Node и npm.
-2. Проверь, что используешь актуальный `dist/webhacker-editor.bundle.js`.
-3. Очисти кэш браузера.
-4. Прогони `npm test`.
-
-## 9) Что читать дальше
-
-1. [02-architecture.md](./02-architecture.md)
-2. [03-toolbar.md](./03-toolbar.md)
-3. [04-security.md](./04-security.md)
+1. Ошибка синтаксиса в `node_modules` с `??` или `?.` — у вас слишком старый Node.
+2. Не применяются стили — убедитесь, что собирается `index.ts` (он импортирует `styles/less/index.less`).
+3. Нет новых кнопок в toolbar — проверьте, что фича подключена в `features/editor/setup.ts`.
