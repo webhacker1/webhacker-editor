@@ -523,6 +523,15 @@ describe("toolbar behavior", () => {
         expect(editor.contentEditableElement.querySelector("strong > p")).toBeNull();
     });
 
+    it("keeps root text with line breaks in one paragraph on input", () => {
+        editor.contentEditableElement.innerHTML = "A<br>B<br>C";
+        editor.contentEditableElement.dispatchEvent(new Event("input", { bubbles: true }));
+
+        const paragraphs = [...editor.contentEditableElement.querySelectorAll(":scope > p")];
+        expect(paragraphs.length).toBe(1);
+        expect(paragraphs[0].innerHTML).toBe("A<br>B<br>C");
+    });
+
     it("flattens nested strong nodes on input", () => {
         editor.contentEditableElement.innerHTML = "<p><strong>a<strong>b</strong></strong></p>";
         editor.contentEditableElement.dispatchEvent(new Event("input", { bubbles: true }));
