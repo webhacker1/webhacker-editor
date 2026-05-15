@@ -6,6 +6,7 @@ import {
     KEY_TAB,
 } from "@/constants/indexConstants";
 import { executeRichCommand } from "@/core/indexCore";
+import { normalizeRootInlineFlow } from "@/core/richtext/utils/indexUtils";
 import type { EditorEventContext } from "@/features/editor/events/eventTypes";
 import {
     getAdjacentTableCell,
@@ -129,13 +130,7 @@ export function bindKeyboardEvents(editor: EditorEventContext): void {
 
             if (!event.shiftKey && ctx.type !== EDITOR_CONTEXT.Code) {
                 event.preventDefault();
-                Array.from(editor.contentEditableElement.childNodes).forEach(node => {
-                    if (node.nodeType === Node.TEXT_NODE && (node.textContent || "").trim() !== "") {
-                        const p = document.createElement("p");
-                        node.replaceWith(p);
-                        p.appendChild(node);
-                    }
-                });
+                normalizeRootInlineFlow(editor.contentEditableElement);
 
                 if (ctx.type === EDITOR_CONTEXT.List) {
                     const handled = executeRichCommand("splitListItem", null, editor);

@@ -656,6 +656,24 @@ describe("toolbar behavior", () => {
         expect(editor.contentEditableElement.querySelector("p")).not.toBeNull();
     });
 
+    it("does not fragment root text flow into many blocks on Enter", () => {
+        editor.contentEditableElement.innerHTML = "A<br>B<br>C";
+        const textNode = editor.contentEditableElement.firstChild as Text;
+        const range = document.createRange();
+        range.setStart(textNode, 1);
+        range.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        editor.currentSavedSelectionRange = editor.saveSelectionRange();
+
+        pressEditorKey(editor, { key: "Enter" });
+
+        const rootNodes = [...editor.contentEditableElement.childNodes];
+        expect(rootNodes.every(node => node.nodeType === Node.ELEMENT_NODE)).toBe(true);
+        expect(editor.contentEditableElement.querySelectorAll(":scope > br").length).toBe(0);
+    });
+
     it("indents list item with Tab", () => {
         editor.contentEditableElement.innerHTML = "<ul><li>one</li><li>two</li></ul>";
         setCaretAtStartOfElement(editor, "ul > li:nth-child(2)");
