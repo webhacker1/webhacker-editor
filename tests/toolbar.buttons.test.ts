@@ -523,13 +523,54 @@ describe("toolbar behavior", () => {
         expect(editor.contentEditableElement.querySelector("strong > p")).toBeNull();
     });
 
-    it("keeps root text with line breaks in one paragraph on input", () => {
-        editor.contentEditableElement.innerHTML = "A<br>B<br>C";
-        editor.contentEditableElement.dispatchEvent(new Event("input", { bubbles: true }));
-
+    it("keeps root text with line breaks in one paragraph on setHTML", () => {
+        editor.setHTML("A<br>B<br>C");
         const paragraphs = [...editor.contentEditableElement.querySelectorAll(":scope > p")];
         expect(paragraphs.length).toBe(1);
         expect(paragraphs[0].innerHTML).toBe("A<br>B<br>C");
+    });
+
+    it("does not move caret to the end on first input in plain root text", () => {
+        editor.contentEditableElement.innerHTML = "abcdef";
+        const textNode = editor.contentEditableElement.firstChild as Text;
+        textNode.textContent = "abXcdef";
+        const range = document.createRange();
+        range.setStart(textNode, 3);
+        range.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        editor.currentSavedSelectionRange = editor.saveSelectionRange();
+
+        editor.contentEditableElement.dispatchEvent(new Event("input", { bubbles: true }));
+        expect(selection.anchorNode).toBe(textNode);
+        expect(selection.anchorOffset).toBe(3);
+    });
+
+    it("applies heading only to selected fragment inside a paragraph", () => {
+        editor.contentEditableElement.innerHTML = "<p>hello world</p>";
+        setSelectionOffsetsInElement(editor, "p", 6, 11);
+        executeRichCommand("formatBlock", "H1", editor);
+
+        const rootChildren = [...editor.contentEditableElement.children];
+        expect(rootChildren[0]?.tagName).toBe("P");
+        expect(rootChildren[0]?.textContent).toBe("hello ");
+        expect(rootChildren[1]?.tagName).toBe("H1");
+        expect(rootChildren[1]?.textContent).toBe("world");
+    });
+
+    it("keeps selected fragment when applying heading from dropdown", () => {
+        editor.contentEditableElement.innerHTML = "<p>hello world</p>";
+        setSelectionOffsetsInElement(editor, "p", 6, 11);
+
+        userClick(getToolbarButtonByLabel(editor, "Headings"));
+        click(getMenuItemByText(editor, "H1"));
+
+        const rootChildren = [...editor.contentEditableElement.children];
+        expect(rootChildren[0]?.tagName).toBe("P");
+        expect(rootChildren[0]?.textContent).toBe("hello ");
+        expect(rootChildren[1]?.tagName).toBe("H1");
+        expect(rootChildren[1]?.textContent).toBe("world");
     });
 
     it("flattens nested strong nodes on input", () => {

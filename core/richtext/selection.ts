@@ -26,7 +26,9 @@ export function getAnchorElement(editor) {
 export function getClosestBlock(editor) {
     const anchorElement = getAnchorElement(editor);
     if (!anchorElement || !anchorElement.closest) return null;
-    return anchorElement.closest(BLOCK_SELECTOR) as HTMLElement | null;
+    const blockElement = anchorElement.closest(BLOCK_SELECTOR) as HTMLElement | null;
+    if (!blockElement || blockElement === editor.contentEditableElement) return null;
+    return blockElement;
 }
 
 export function placeCaretAtNodeEnd(node) {

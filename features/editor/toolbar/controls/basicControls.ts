@@ -119,7 +119,11 @@ export function createHeadingDropdown(editor, t) {
         menuItemElement.addEventListener("mousedown", event => event.preventDefault());
         menuItemElement.addEventListener(
             "click",
-            createMenuAction(editor, () => executeRichCommand("formatBlock", tag.toUpperCase(), editor))
+            createMenuAction(
+                editor,
+                () => executeRichCommand("formatBlock", tag.toUpperCase(), editor),
+                { preferSavedSelection: true }
+            )
         );
         dropdownMenuElement.appendChild(menuItemElement);
     });

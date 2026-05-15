@@ -1,5 +1,5 @@
 import { queryEditorCommandState, setActiveEditor } from "@/core/richtext/indexRichtext";
-import { normalizeInvalidInlineMarkContainers } from "@/core/richtext/utils/indexUtils";
+import { normalizeInvalidInlineMarkContainers, normalizeRootInlineFlow } from "@/core/richtext/utils/indexUtils";
 import { buildToolbar } from "@/features/editor/toolbar/indexToolbar";
 import { sanitizeHtmlStringToSafeHtml } from "@/sanitize/indexSanitize";
 import { applyThemeVariables, createElement } from "@/ui/indexUi";
@@ -123,6 +123,7 @@ export default class WebHackerEditor {
     setHTML(htmlString) {
         const safeHtml = sanitizeHtmlStringToSafeHtml(htmlString);
         this.contentEditableElement.innerHTML = safeHtml || "";
+        normalizeRootInlineFlow(this.contentEditableElement);
         normalizeInvalidInlineMarkContainers(this.contentEditableElement);
         if (typeof this.highlightCodeBlocks === "function") this.highlightCodeBlocks();
         resetHistory(this);
