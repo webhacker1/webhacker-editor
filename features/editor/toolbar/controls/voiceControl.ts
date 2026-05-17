@@ -1,5 +1,4 @@
 import { createToolbarButton } from "@/features/editor/toolbar/toolbarContext";
-import { createElement } from "@/ui/indexUi";
 
 type SpeechRecognitionAlternativeLike = {
     transcript?: string;
@@ -29,7 +28,6 @@ const VOICE_FATAL_ERROR_SET = new Set([
     "language-not-supported",
     "audio-capture",
 ]);
-const VOICE_CONTROL_ENABLED = false;
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
@@ -141,28 +139,7 @@ function updateVoiceButtonState(
     if (iconElement) iconElement.className = isListening ? "fa-solid fa-stop" : "fa-solid fa-microphone";
 }
 
-function createDisabledVoiceButton(t): HTMLButtonElement {
-    const buttonElement = createElement("button", "webhacker-button", {
-        type: "button",
-        "aria-label": `${t.voice.label} (${t.soon})`,
-        "aria-disabled": "true",
-        "data-tooltip": t.soon
-    }) as HTMLButtonElement;
-
-    const iconWrapElement = createElement("span", "webhacker-button__icon-lock");
-    const voiceIconElement = createElement("i", "fa-solid fa-microphone");
-    const lockIconElement = createElement("i", "fa-solid fa-lock");
-    lockIconElement.setAttribute("aria-hidden", "true");
-    iconWrapElement.append(voiceIconElement, lockIconElement);
-    buttonElement.appendChild(iconWrapElement);
-    buttonElement.disabled = true;
-
-    return buttonElement;
-}
-
 export function createVoiceControl(editor, t) {
-    if (!VOICE_CONTROL_ENABLED) return createDisabledVoiceButton(t);
-
     const voiceT = t.voice;
     const idleLabel = voiceT.start;
     const stopLabel = voiceT.stop;
